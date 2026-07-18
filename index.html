@@ -1,0 +1,2217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Francofile</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Francofile">
+<meta name="theme-color" content="#1e3a8a">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAABs0lEQVR42u3cIQrCYBiAYSdra2Kx7ABrYtsJLII3MFnWvcQOYBe8gWcwik3LihZRZM2sWTAq7mfPc4F9+3n5/jIWpXnZgU+6jgBxIA7EgTgQB+JAHIgDcSAOEAfiQByIA3EgDsSBOBAH4gBxIA7EgTgQB+JAHIgDcSAOEAfiQByIA3EgDsSBOBAH4kAcIA7EgTgQB+JAHIiD0MVBT7/bFP1e0vAh7/VjNFnaHLhWEAfiAHEgDsSBOBAH4kAciANxIA54F7f2zfeHy3S+VoDNgTgQB+JAHIgDcSAOxIE4QByIA3EgDsRB07T3e45hNjhtFz99xLG6jWcrmwPXCuIAcSAOxIE4EAfiQByIA3EgDsQBn/gFAzYH4kAciANxIA7EgTgQB+IAcSAOxIE4EAfiQByIA3EgDhAH4kAciANxIA7EgTgQB+IAcSAOxME3RWleOgVsDsSBOBAH4kAciANxIA7EAeJAHIgDcSAOxIE4EAfioF3i8zUJbuhnVQQ3c53lNgeuFcSBOEAciANxIA7EgTgQB+JAHIgDxIE4EAfiQByIA3EgDsSBOEAciANxIA7Ewb+9ALDLHOAjgA6WAAAAAElFTkSuQmCC">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231e3a8a'/%3E%3Ctext x='50' y='68' font-size='60' font-weight='bold' font-family='sans-serif' fill='white' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E">
+<link rel="manifest" href='data:application/manifest+json,{"name":"Francofile","short_name":"Francofile","display":"standalone","background_color":"%23f4f5f9","theme_color":"%231e3a8a","start_url":"."}'>
+<style>
+:root{
+  --bg:#f4f5f9; --card:#ffffff; --ink:#1c2130; --muted:#6b7280;
+  --accent:#1e3a8a; --accent-soft:#e5eaf7; --good:#1a7f4e; --good-soft:#e2f3ea;
+  --warn:#a05a00; --warn-soft:#fdf0dc; --bad:#b3261e; --bad-soft:#fbe7e6;
+  --border:#e2e5ee; --shadow:0 1px 3px rgba(20,30,60,.08);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#12151f; --card:#1c2130; --ink:#eef0f6; --muted:#9aa1b5;
+    --accent:#8fa7e8; --accent-soft:#26314f; --good:#5fc98f; --good-soft:#1c3328;
+    --warn:#e8b46a; --warn-soft:#3a2e1a; --bad:#f28b82; --bad-soft:#3d2422;
+    --border:#2b3247; --shadow:0 1px 3px rgba(0,0,0,.3);
+  }
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0; padding:0;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg); color:var(--ink); font-size:16px; line-height:1.45;
+  padding-bottom:calc(64px + env(safe-area-inset-bottom));
+}
+header{
+  background:var(--card); border-bottom:1px solid var(--border);
+  padding:calc(10px + env(safe-area-inset-top)) 16px 10px;
+  position:sticky; top:0; z-index:10;
+}
+.hrow{display:flex; align-items:center; justify-content:space-between; max-width:640px; margin:0 auto; gap:8px;}
+.hrow h1{font-size:1.15rem; margin:0; letter-spacing:.2px; flex:1;}
+.hrow h1 span{color:var(--accent);}
+#levelPill{font-size:.8rem; font-weight:600; color:var(--accent); background:var(--accent-soft); padding:2px 10px; border-radius:999px; white-space:nowrap;}
+#gearBtn{background:none; padding:4px; color:var(--muted); border-radius:8px;}
+#gearBtn.on{color:var(--accent);}
+#gearBtn svg{width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; display:block;}
+.pwrap{max-width:640px; margin:8px auto 0;}
+.pbar{height:6px; background:var(--accent-soft); border-radius:999px; overflow:hidden;}
+#pfill{height:100%; width:0%; background:var(--accent); border-radius:999px; transition:width .4s ease;}
+.psub{display:flex; justify-content:space-between; font-size:.72rem; color:var(--muted); margin-top:4px;}
+#gateBar{
+  display:none; max-width:640px; margin:10px auto 0;
+  background:var(--warn-soft); border-radius:10px; padding:8px 12px;
+  font-size:.85rem; align-items:center; justify-content:space-between; gap:8px;
+}
+#gateBar.show{display:flex;}
+#gateBar button{padding:6px 12px; font-size:.82rem; background:var(--warn); color:#fff;}
+main{max-width:640px; margin:0 auto; padding:16px;}
+.view{display:none;}
+.view.active{display:block; animation:fadein .18s ease;}
+@keyframes fadein{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+.card{
+  background:var(--card); border:1px solid var(--border); border-radius:14px;
+  padding:16px; margin-bottom:14px; box-shadow:var(--shadow);
+}
+.card h2{font-size:.8rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin:0 0 10px;}
+.sentence{font-size:1.2rem; font-weight:600; min-height:1.5em;}
+.passage{font-size:1.02rem; line-height:1.7;}
+.passage .w{cursor:pointer; border-radius:4px; padding:0 1px;}
+.passage .w.selword{background:var(--accent-soft); color:var(--accent);}
+.lookup{background:var(--accent-soft); border-radius:10px; padding:10px 12px; margin-top:10px; font-size:.92rem;}
+.lookup b{color:var(--accent);}
+.lookup .addbtn{margin-top:8px; padding:6px 12px; font-size:.82rem; background:var(--accent); color:#fff;}
+textarea,input[type=text],input[type=password],select{
+  width:100%; font:inherit; color:var(--ink); background:var(--bg);
+  border:1px solid var(--border); border-radius:10px; padding:10px 12px; margin-top:10px;
+}
+textarea{resize:vertical; min-height:72px;}
+textarea:focus,input:focus,select:focus{outline:2px solid var(--accent); outline-offset:-1px;}
+button{
+  font:inherit; font-weight:600; border:none; border-radius:10px;
+  padding:10px 16px; cursor:pointer; background:var(--accent); color:#fff;
+}
+button:disabled{opacity:.5; cursor:default;}
+button.ghost{background:var(--accent-soft); color:var(--accent);}
+button.subtle{background:transparent; color:var(--muted); font-weight:500;}
+button.danger{background:var(--bad-soft); color:var(--bad);}
+.btnrow{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+.btnrow button{flex:1; min-width:110px;}
+.result{margin-top:14px; display:none;}
+.result.show{display:block;}
+.scoreline{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+.scorebadge{font-size:1.05rem; font-weight:700; padding:4px 12px; border-radius:10px;}
+.scorebadge.good{background:var(--good-soft); color:var(--good);}
+.scorebadge.mid{background:var(--warn-soft); color:var(--warn);}
+.scorebadge.low{background:var(--bad-soft); color:var(--bad);}
+.errbox{background:var(--bad-soft); border-radius:10px; padding:10px 12px; margin-top:8px; font-size:.92rem;}
+.errbox b{color:var(--bad);}
+.nativebox{background:var(--good-soft); border-radius:10px; padding:10px 12px; margin-top:8px; font-size:.95rem;}
+.nativebox b{color:var(--good);}
+.notebox{color:var(--muted); font-size:.88rem; margin-top:8px;}
+.statline{font-size:.85rem; color:var(--muted); margin-bottom:10px;}
+.chips{display:flex; flex-wrap:wrap; gap:8px;}
+.chip{
+  background:var(--accent-soft); color:var(--accent); border:none;
+  font-size:.85rem; font-weight:600; padding:8px 14px; border-radius:999px;
+}
+.chip.warn{background:var(--warn-soft); color:var(--warn);}
+.lesson{background:var(--accent-soft); border-radius:10px; padding:12px 14px; font-size:.93rem; line-height:1.55; margin-bottom:12px; white-space:pre-wrap;}
+.subtabs{display:flex; gap:8px; margin-bottom:12px;}
+.subtabs button{flex:1; background:var(--card); color:var(--muted); border:1px solid var(--border); font-size:.9rem; padding:10px 4px;}
+.subtabs button.on{background:var(--accent); color:#fff; border-color:var(--accent);}
+.dirtoggle{display:flex; justify-content:center; margin-bottom:12px;}
+.dirtoggle button{background:var(--accent-soft); color:var(--accent); font-size:.85rem; padding:6px 14px;}
+.flashcard{
+  background:var(--card); border:1px solid var(--border); border-radius:16px;
+  min-height:170px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:20px; text-align:center; box-shadow:var(--shadow); margin-bottom:12px; position:relative;
+}
+.flashcard .front{font-size:1.5rem; font-weight:700;}
+.flashcard .back{font-size:1.15rem; color:var(--accent); margin-top:10px; font-weight:600;}
+#fcHear{
+  position:absolute; top:10px; right:10px; background:var(--accent-soft); color:var(--accent);
+  padding:6px 10px; font-size:.8rem; border-radius:8px;
+}
+.gradebtns{display:none; gap:8px;}
+.gradebtns.show{display:flex;}
+.gradebtns button{flex:1; padding:12px 4px; font-size:.85rem;}
+.g-again{background:var(--bad-soft); color:var(--bad);}
+.g-hard{background:var(--warn-soft); color:var(--warn);}
+.g-good{background:var(--accent-soft); color:var(--accent);}
+.g-easy{background:var(--good-soft); color:var(--good);}
+.matchgrid{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+.matchgrid button{
+  background:var(--card); color:var(--ink); border:1px solid var(--border);
+  padding:14px 8px; font-weight:600; font-size:.95rem; min-height:52px;
+}
+.matchgrid button.sel{border-color:var(--accent); background:var(--accent-soft); color:var(--accent);}
+.matchgrid button.done{opacity:.25; pointer-events:none;}
+.matchgrid button.wrong{border-color:var(--bad); background:var(--bad-soft); color:var(--bad);}
+.weakrow{
+  display:flex; align-items:center; gap:10px; padding:10px 0;
+  border-bottom:1px solid var(--border); font-size:.95rem;
+}
+.weakrow:last-child{border-bottom:none;}
+.weakrow .w-no{font-weight:700;}
+.weakrow .w-en{color:var(--muted);}
+.weakrow .w-meta{margin-left:auto; font-size:.75rem; color:var(--bad); white-space:nowrap;}
+.weakrow .w-hear{background:var(--accent-soft); color:var(--accent); padding:4px 9px; font-size:.78rem; border-radius:8px;}
+.qblock{margin-top:14px; padding-top:12px; border-top:1px solid var(--border);}
+.qblock .qtext{font-weight:600; margin-bottom:8px;}
+.opts{display:flex; flex-direction:column; gap:6px;}
+.opts button{
+  background:var(--bg); color:var(--ink); border:1px solid var(--border);
+  text-align:left; font-weight:500; padding:10px 12px;
+}
+.opts button.correct{background:var(--good-soft); border-color:var(--good); color:var(--good); font-weight:700;}
+.opts button.incorrect{background:var(--bad-soft); border-color:var(--bad); color:var(--bad);}
+.opts button:disabled{opacity:1; cursor:default;}
+.why{font-size:.85rem; color:var(--muted); margin-top:6px; display:none;}
+.why.show{display:block;}
+#chatLog{display:flex; flex-direction:column; gap:10px; margin-bottom:12px; min-height:120px;}
+.msg{max-width:85%; padding:10px 14px; border-radius:16px; font-size:.97rem;}
+.msg.ai{background:var(--card); border:1px solid var(--border); align-self:flex-start; border-bottom-left-radius:4px;}
+.msg.me{background:var(--accent); color:#fff; align-self:flex-end; border-bottom-right-radius:4px;}
+.msg.corr{background:var(--warn-soft); color:var(--ink); align-self:flex-end; font-size:.84rem; max-width:85%; border-radius:10px;}
+.msg.corr b{color:var(--warn);}
+.chatrow{display:flex; gap:8px;}
+.chatrow textarea{flex:1; min-height:44px; margin-top:0;}
+.chatrow button{align-self:flex-end;}
+#chMic.rec{background:var(--bad); color:#fff;}
+label{display:block; font-size:.85rem; font-weight:600; margin-top:14px; color:var(--muted);}
+label:first-child{margin-top:0;}
+nav{
+  position:fixed; bottom:0; left:0; right:0; z-index:10;
+  background:var(--card); border-top:1px solid var(--border);
+  display:flex; padding-bottom:env(safe-area-inset-bottom);
+}
+nav button{
+  flex:1; background:none; color:var(--muted); font-size:.66rem; font-weight:600;
+  padding:8px 1px 10px; border-radius:0; display:flex; flex-direction:column; align-items:center; gap:2px;
+}
+nav button svg{width:21px; height:21px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
+nav button.on{color:var(--accent);}
+#toast{
+  position:fixed; left:50%; transform:translateX(-50%);
+  bottom:calc(76px + env(safe-area-inset-bottom));
+  background:var(--ink); color:var(--bg); padding:10px 18px; border-radius:12px;
+  font-size:.9rem; font-weight:600; opacity:0; pointer-events:none; transition:opacity .25s;
+  max-width:90%; text-align:center; z-index:50;
+}
+#toast.show{opacity:1;}
+.spin{display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; vertical-align:-2px; margin-right:6px;}
+button.ghost .spin,button.subtle .spin,button.chip .spin{border-color:var(--accent-soft); border-top-color:var(--accent);}
+@keyframes spin{to{transform:rotate(360deg);}}
+.hint{font-size:.82rem; color:var(--muted); margin-top:8px;}
+.bigstat{display:flex; gap:10px; margin-top:4px;}
+.bigstat div{flex:1; background:var(--bg); border-radius:10px; padding:10px; text-align:center;}
+.bigstat .n{font-size:1.3rem; font-weight:700; color:var(--accent);}
+.bigstat .l{font-size:.72rem; color:var(--muted);}
+.profrow{display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); font-size:.92rem;}
+.profrow:last-child{border-bottom:none;}
+.profrow .p-lvl{font-weight:700; color:var(--accent); background:var(--accent-soft); padding:2px 10px; border-radius:999px; font-size:.8rem;}
+.profrow .p-cov{font-size:.78rem; color:var(--muted);}
+details.syl{border:1px solid var(--border); border-radius:10px; margin-top:8px; padding:0 12px;}
+details.syl summary{cursor:pointer; font-weight:600; font-size:.9rem; padding:10px 0; color:var(--ink);}
+.goalrow{display:flex; gap:8px; padding:7px 0; border-top:1px solid var(--border); font-size:.85rem; color:var(--muted); align-items:flex-start;}
+.goalrow .gmark{flex-shrink:0; width:18px; text-align:center;}
+.goalrow.done{color:var(--ink);}
+.goalrow.done .gmark{color:var(--good);}
+.goalrow.part .gmark{color:var(--warn);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hrow">
+    <h1>Franco<span>file</span></h1>
+    <span id="levelPill">Level 1</span>
+    <button id="gearBtn" aria-label="Settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2.1-1.3L14 3h-4l-.5 2.6a7 7 0 0 0-2.1 1.3l-2.3-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2.1 1.3L10 21h4l.5-2.6a7 7 0 0 0 2.1-1.3l2.3 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/></svg></button>
+  </div>
+  <div class="pwrap">
+    <div class="pbar"><div id="pfill"></div></div>
+    <div class="psub"><span id="plabel">A1</span><span id="ppct">0% to C2</span></div>
+  </div>
+  <div id="gateBar"><span>Checkpoint reached! Pass a short test to keep leveling.</span><button id="gateBtn">Take the test</button></div>
+</header>
+
+<main>
+
+<!-- TRANSLATE -->
+<section class="view active" id="view-translate">
+  <div class="card">
+    <h2>Translate to French</h2>
+    <div class="sentence" id="trEn">Tap "New sentence" to begin.</div>
+    <textarea id="trInput" placeholder="Écris en français..." autocapitalize="sentences" autocomplete="off"></textarea>
+    <div class="btnrow">
+      <button id="trCheck">Check</button>
+      <button class="ghost" id="trNew">New sentence</button>
+    </div>
+    <div class="result" id="trResult"></div>
+  </div>
+</section>
+
+<!-- VOCAB -->
+<section class="view" id="view-vocab">
+  <div class="subtabs">
+    <button id="vtFlash" class="on">Cards</button>
+    <button id="vtMatch">Matching</button>
+    <button id="vtWeak">Weak words</button>
+  </div>
+  <div class="dirtoggle"><button id="vDir">French &rarr; English</button></div>
+  <div class="statline" id="vStats"></div>
+  <div id="vFlashArea">
+    <div class="flashcard" id="fcCard">
+      <button id="fcHear" style="display:none">&#128266; Hear</button>
+      <div class="front" id="fcFront">No cards yet</div>
+      <div class="back" id="fcBack" style="display:none"></div>
+    </div>
+    <div class="btnrow" id="fcRevealRow"><button id="fcReveal">Show answer</button></div>
+    <div class="gradebtns" id="fcGrades">
+      <button class="g-again" data-g="0">Again</button>
+      <button class="g-hard" data-g="3">Hard</button>
+      <button class="g-good" data-g="4">Good</button>
+      <button class="g-easy" data-g="5">Easy</button>
+    </div>
+    <div class="btnrow"><button class="subtle" id="fcPractice">Practice 10 random cards</button></div>
+  </div>
+  <div id="vMatchArea" style="display:none">
+    <div class="matchgrid" id="mGrid"></div>
+    <div class="btnrow"><button class="ghost" id="mNew">New round</button></div>
+    <div class="hint" id="mHint"></div>
+  </div>
+  <div id="vWeakArea" style="display:none">
+    <div class="card">
+      <h2>Your toughest cards</h2>
+      <div id="weakList"></div>
+      <div class="btnrow">
+        <button id="weakDrill">Drill these</button>
+        <button class="ghost" id="weakPhrase">Make phrase cards</button>
+      </div>
+      <div class="hint">Ranked by how often they beat you. "Make phrase cards" builds short natural phrases around the five hardest words, so you learn them in context.</div>
+    </div>
+  </div>
+  <div class="card" id="seedCard" style="display:none">
+    <h2>Starter deck</h2>
+    <p style="margin:0 0 4px; font-size:.92rem;">Your deck is nearly empty. Seed it with 30 items picked for your level and topics; your mistakes in other modes will grow it from there.</p>
+    <div class="btnrow"><button id="seedBtn">Seed starter deck</button></div>
+  </div>
+</section>
+
+<!-- GRAMMAR -->
+<section class="view" id="view-grammar">
+  <div class="card" id="gPicker">
+    <h2>Your rough spots</h2>
+    <div class="chips" id="gMistakes"><span class="hint">Do a few Translate or Listening exercises and your recurring error patterns will show up here.</span></div>
+    <h2 style="margin-top:16px">All topics</h2>
+    <div class="chips" id="gTopics"></div>
+  </div>
+  <div id="gArea" style="display:none">
+    <div class="card">
+      <h2 id="gTitle">Lesson</h2>
+      <div class="lesson" id="gLesson"></div>
+      <div class="statline" id="gProg"></div>
+      <div class="sentence" id="gExPrompt"></div>
+      <textarea id="gInput" placeholder="Écris en français..." autocapitalize="sentences" autocomplete="off"></textarea>
+      <div class="btnrow">
+        <button id="gCheck">Check</button>
+        <button class="ghost" id="gNext" style="display:none">Next</button>
+      </div>
+      <div class="result" id="gResult"></div>
+      <div class="btnrow"><button class="subtle" id="gBack">Choose another topic</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- READ -->
+<section class="view" id="view-read">
+  <div class="card">
+    <h2>Reading</h2>
+    <p class="hint" id="rdHint" style="margin-top:0">A French text at your level, with questions. Tap Listen to hear it read aloud, and tap any word to look it up. Texts get longer and richer as you level up.</p>
+    <div class="btnrow"><button id="rdNew">New text</button></div>
+  </div>
+  <div id="rdArea" style="display:none">
+    <div class="card">
+      <div class="btnrow" style="margin-top:0; margin-bottom:12px">
+        <button class="ghost" id="rdPlay">&#9654; Listen</button>
+        <button class="ghost" id="rdSlow">Slow</button>
+      </div>
+      <div class="passage" id="rdPassage"></div>
+      <div class="hint">Tap any word to look it up.</div>
+      <div class="lookup" id="rdLookup" style="display:none"></div>
+      <div id="rdQs"></div>
+      <div class="nativebox" id="rdScore" style="display:none"></div>
+    </div>
+  </div>
+</section>
+
+<!-- LISTEN -->
+<section class="view" id="view-listen">
+  <div class="card">
+    <h2>Listening</h2>
+    <p class="hint" id="liHint">Tap "New sentence", then Play, and type what you hear in French. Clips get longer as you level up.</p>
+    <div class="btnrow">
+      <button id="liPlay" disabled>&#9654; Play</button>
+      <button class="ghost" id="liSlow" disabled>Slow</button>
+      <button class="ghost" id="liNew">New sentence</button>
+    </div>
+    <textarea id="liInput" placeholder="Écris ce que tu as entendu..." autocapitalize="sentences" autocomplete="off"></textarea>
+    <div class="btnrow"><button id="liCheck" disabled>Check</button></div>
+    <div class="result" id="liResult"></div>
+  </div>
+</section>
+
+<!-- CHAT -->
+<section class="view" id="view-chat">
+  <div id="chatLog"></div>
+  <div class="chatrow">
+    <textarea id="chInput" placeholder="Écris en français..." autocapitalize="sentences"></textarea>
+    <button class="ghost" id="chMic" style="display:none" aria-label="Dictate">&#127908;</button>
+    <button id="chSend">Send</button>
+  </div>
+  <div class="btnrow"><button class="subtle" id="chReset">Start a new conversation</button></div>
+</section>
+
+<!-- CHECKPOINT / PLACEMENT TEST -->
+<section class="view" id="view-test">
+  <div class="card">
+    <h2 id="tHead">Checkpoint test</h2>
+    <div class="statline" id="tProg"></div>
+    <div class="sentence" id="tPrompt"></div>
+    <div class="btnrow" id="tAudioRow" style="display:none">
+      <button id="tPlay">&#9654; Play</button>
+      <button class="ghost" id="tSlow">Slow</button>
+    </div>
+    <div class="opts" id="tOpts" style="display:none; margin-top:12px"></div>
+    <div id="tReadArea" style="display:none"></div>
+    <textarea id="tInput" placeholder="Ta réponse..." autocapitalize="sentences" autocomplete="off"></textarea>
+    <div class="btnrow">
+      <button id="tCheck">Check</button>
+      <button class="ghost" id="tNext" style="display:none">Next</button>
+    </div>
+    <div class="result" id="tResult"></div>
+    <div class="nativebox" id="tSummary" style="display:none"></div>
+    <div class="btnrow"><button class="subtle" id="tBack">Back to practice</button></div>
+  </div>
+</section>
+
+<!-- SETTINGS -->
+<section class="view" id="view-settings">
+  <div class="card">
+    <h2>Setup</h2>
+    <label for="sKey">Anthropic API key</label>
+    <input type="password" id="sKey" placeholder="sk-ant-..." autocomplete="off">
+    <label for="sDiff">Difficulty nudge</label>
+    <select id="sDiff">
+      <option value="easier">Easier</option>
+      <option value="standard" selected>Standard</option>
+      <option value="harder">Harder</option>
+    </select>
+    <label for="sCardStyle">New vocabulary cards</label>
+    <select id="sCardStyle">
+      <option value="phrases" selected>Words and short phrases</option>
+      <option value="words">Single words only</option>
+    </select>
+    <label for="sTopics">Your personal topics</label>
+    <textarea id="sTopics"></textarea>
+    <p class="hint">These are mixed automatically with core learner themes like numbers, dates and times, directions, feelings, and making plans, so your practice covers the essentials too.</p>
+    <label for="sVoice">French voice</label>
+    <select id="sVoice"></select>
+    <div class="btnrow"><button id="sSave">Save settings</button></div>
+  </div>
+  <div class="card">
+    <h2>Progress</h2>
+    <div class="bigstat">
+      <div><div class="n" id="stCards">0</div><div class="l">cards in deck</div></div>
+      <div><div class="n" id="stEx">0</div><div class="l">exercises done</div></div>
+      <div><div class="n" id="stDays">0</div><div class="l">days practiced</div></div>
+    </div>
+    <div id="profileRows" style="margin-top:12px"></div>
+  </div>
+  <div class="card">
+    <h2>Official syllabus</h2>
+    <p class="hint" style="margin-top:0">Goals adapted from the CEFR standard behind the official DELF and DALF exams (France Education International), levels A1 to C2. The placement test finds your starting point per skill; checkpoint tests then verify goals one by one. Oral skills are practiced in Chat but cannot be formally verified by typing.</p>
+    <div class="btnrow"><button id="plStart">Take placement test</button></div>
+    <div id="sylList"></div>
+  </div>
+  <div class="card">
+    <h2>Sync across devices</h2>
+    <p class="hint" style="margin-top:0">Keeps your deck, level, and syllabus progress identical on laptop and phone via a private GitHub Gist. Paste the same GitHub token on both devices and tap Connect. The Anthropic API key is never synced.</p>
+    <label for="sGhToken">GitHub token (gist scope only)</label>
+    <input type="password" id="sGhToken" placeholder="ghp_..." autocomplete="off">
+    <div class="btnrow">
+      <button id="syncConnect">Connect</button>
+      <button class="ghost" id="syncNowBtn">Sync now</button>
+    </div>
+    <div class="hint" id="syncStatus">Not connected.</div>
+  </div>
+  <div class="card">
+    <h2>Backup</h2>
+    <p class="hint" style="margin-top:0">Your progress lives only on this device unless sync is on. Export a backup now and then. (The API key is not included in backups.)</p>
+    <div class="btnrow">
+      <button class="ghost" id="sExport">Export backup</button>
+      <button class="ghost" id="sImport">Import backup</button>
+      <input type="file" id="sImportFile" accept=".json" style="display:none">
+    </div>
+    <div class="btnrow"><button class="danger" id="sReset">Erase all data</button></div>
+  </div>
+</section>
+
+</main>
+
+<nav>
+  <button data-view="translate" class="on"><svg viewBox="0 0 24 24"><path d="M4 5h9M8.5 5v2.5c0 3-2 5.5-4.5 6.5M5.5 9c1 2.7 3.5 5 6.5 5.5M13 19l4-9 4 9M14.2 16.5h5.6"/></svg>Translate</button>
+  <button data-view="vocab"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="13" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13M7 10h5M7 14h5"/></svg>Vocab</button>
+  <button data-view="grammar"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.6H20l-4.9 3.6 1.9 5.8-5-3.6-5 3.6 1.9-5.8L4 8.6h6.1z"/></svg>Grammar</button>
+  <button data-view="read"><svg viewBox="0 0 24 24"><path d="M12 6c-1.5-1.3-3.5-2-6-2H4v14h2c2.5 0 4.5.7 6 2 1.5-1.3 3.5-2 6-2h2V4h-2c-2.5 0-4.5.7-6 2zM12 6v14"/></svg>Read</button>
+  <button data-view="listen"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4zM15.5 8.5a5 5 0 0 1 0 7M18.5 6a9 9 0 0 1 0 12"/></svg>Listen</button>
+  <button data-view="chat"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-8 8H4l2-3a8 8 0 1 1 15-5z"/><path d="M8.5 11h.01M12.5 11h.01M16.5 11h.01"/></svg>Chat</button>
+</nav>
+
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   Francofile v1
+   Single-file French practice app, A1 through C2.
+   Engine shared with NorGareth. AI: Anthropic API, claude-haiku-4-5.
+   ============================================================ */
+
+const STORE_KEY = "francofile_v1";
+const KEY_KEY = "francofile_apikey";
+const MODEL = "claude-haiku-4-5";
+const TOTAL_LEVELS = 300;
+const XP_PER_LEVEL = 100;
+const GATE_EVERY = 10;
+const DEFAULT_TOPICS = "daily life and family, travel in France, food and cooking, books and films, work life, current events";
+
+const $ = id => document.getElementById(id);
+
+/* ---------- state ---------- */
+let S = {
+  settings: { difficulty: "standard", topics: DEFAULT_TOPICS, voiceURI: "", cardStyle: "phrases" },
+  level: 1, xp: 0,
+  deck: [],
+  stats: { exercises: 0, days: {} },
+  recentEn: [],
+  recentThemes: [],
+  grammarLog: {},
+  gate: { pending: false, level: 0 },
+  goals: {},
+  profile: { listen: "", read: "", write: "", placedAt: null }
+};
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) {
+      const d = JSON.parse(raw);
+      S = Object.assign(S, d);
+      S.settings = Object.assign({ difficulty:"standard", topics:DEFAULT_TOPICS, voiceURI:"", cardStyle:"phrases" }, d.settings || {});
+      S.stats = Object.assign({ exercises:0, days:{} }, d.stats || {});
+      S.grammarLog = d.grammarLog || {};
+      S.gate = d.gate || { pending: false, level: 0 };
+      S.goals = d.goals || {};
+      S.profile = Object.assign({ listen: "", read: "", write: "", placedAt: null }, d.profile || {});
+      if (!Array.isArray(S.deck)) S.deck = [];
+      if (!Array.isArray(S.recentEn)) S.recentEn = [];
+      if (!Array.isArray(S.recentThemes)) S.recentThemes = [];
+      for (const c of S.deck) { if (c.lapses == null) c.lapses = 0; }
+    }
+  } catch (e) { console.error("load failed", e); }
+}
+let syncDirty = false;
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); syncDirty = true; }
+  catch (e) { toast("Could not save progress: " + e.message); }
+}
+function apiKey() { return localStorage.getItem(KEY_KEY) || ""; }
+function markDay() {
+  const d = new Date().toISOString().slice(0, 10);
+  if (!S.stats.days[d]) { S.stats.days[d] = 1; }
+}
+
+/* ---------- progress: 300 levels spanning A1 to C2 ---------- */
+function cefrLabel(lvl) {
+  if (lvl <= 50) return "A1";
+  if (lvl <= 100) return "A2";
+  if (lvl <= 150) return "B1";
+  if (lvl <= 200) return "B2";
+  if (lvl <= 250) return "C1";
+  return "C2";
+}
+function levelLoop() {
+  let leveled = false;
+  while (S.xp >= XP_PER_LEVEL && S.level < TOTAL_LEVELS && !S.gate.pending) {
+    S.xp -= XP_PER_LEVEL; S.level++; leveled = true;
+    if (S.level % GATE_EVERY === 0) {
+      S.gate = { pending: true, level: S.level };
+      toast("Level " + S.level + " checkpoint! Pass a short test to keep leveling.", 4500);
+    }
+  }
+  return leveled;
+}
+function addXP(n, countExercise) {
+  if (n > 0) {
+    S.xp += n;
+    const leveled = levelLoop();
+    if (leveled && !S.gate.pending) toast("Level up! Now level " + S.level + " (" + cefrLabel(S.level) + ")");
+  }
+  if (countExercise !== false) S.stats.exercises++;
+  markDay();
+  save();
+  renderProgress();
+}
+function renderProgress() {
+  $("levelPill").textContent = "Level " + S.level;
+  $("plabel").textContent = cefrLabel(S.level);
+  const total = ((S.level - 1) * XP_PER_LEVEL + Math.min(S.xp, XP_PER_LEVEL)) / (TOTAL_LEVELS * XP_PER_LEVEL);
+  const pct = Math.min(100, total * 100);
+  $("pfill").style.width = pct.toFixed(2) + "%";
+  $("ppct").textContent = pct < 100 ? pct.toFixed(1) + "% to C2" : "C2 reached!";
+  $("gateBar").classList.toggle("show", !!S.gate.pending);
+}
+
+/* ---------- toast / busy / esc ---------- */
+let toastTimer = null;
+function toast(msg, ms) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), ms || 3200);
+}
+function busy(btn, on, label) {
+  if (!btn) return;
+  if (on) {
+    btn.dataset.label = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spin"></span>' + (label || "Thinking...");
+  } else {
+    btn.disabled = false;
+    if (btn.dataset.label) btn.innerHTML = btn.dataset.label;
+  }
+}
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+}
+
+/* ---------- Anthropic API ---------- */
+async function callClaude(system, messages, maxTokens) {
+  const key = apiKey();
+  if (!key) { throw new Error("No API key set. Add it in Settings (gear icon, top right)."); }
+  let res;
+  try {
+    res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": key,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({ model: MODEL, max_tokens: maxTokens || 1000, system: system, messages: messages })
+    });
+  } catch (e) {
+    throw new Error("Network problem reaching the AI. Your progress is safe; try again.");
+  }
+  if (!res.ok) {
+    let detail = "";
+    try { const j = await res.json(); detail = (j.error && j.error.message) || ""; } catch (e) {}
+    if (res.status === 401) throw new Error("API key rejected. Check it in Settings.");
+    if (res.status === 429) throw new Error("Rate limited by the API. Wait a moment and try again.");
+    throw new Error("API error (" + res.status + "). " + detail);
+  }
+  const data = await res.json();
+  return (data.content && data.content[0] && data.content[0].text) || "";
+}
+function extractJSON(text) {
+  const a = text.indexOf("{"), b = text.lastIndexOf("}");
+  if (a === -1 || b === -1 || b <= a) throw new Error("The AI reply was not in the expected format. Try again.");
+  return JSON.parse(text.slice(a, b + 1));
+}
+async function callJSON(system, messages, maxTokens) {
+  const text = await callClaude(system, messages, maxTokens);
+  return extractJSON(text);
+}
+function promptContext() {
+  return "Learner: a native English speaker learning French, level " + S.level + " of " + TOTAL_LEVELS + " (CEFR " + cefrLabel(S.level) +
+    "). Difficulty preference: " + S.settings.difficulty +
+    ". Topics to draw from naturally: " + S.settings.topics +
+    ". Always natural, modern French as spoken in France. English text uses US spelling. Never use em dashes anywhere.";
+}
+function vocabSpec() {
+  return S.settings.cardStyle === "phrases"
+    ? "vocab items may be single words or short natural phrases of 2 to 5 words (collocations and chunks worth memorizing as units)"
+    : "vocab items are single words or fixed expressions";
+}
+const TAG_LIST = "word order, verb tense, verb conjugation, subjunctive, gender or article, agreement, pronoun, preposition, negation, question formation, register, vocabulary choice, accents or spelling, other";
+
+/* ---------- theme variety ---------- */
+const CORE_THEMES = [
+  "numbers, prices, and quantities",
+  "dates, times, and schedules",
+  "directions and getting around",
+  "health and the body",
+  "clothes and shopping",
+  "food, cooking, and restaurants",
+  "family and relationships",
+  "feelings and opinions",
+  "making plans and the future",
+  "childhood and memories",
+  "weather and seasons",
+  "house and home",
+  "travel and transport",
+  "work, meetings, and small talk",
+  "making requests and asking politely",
+  "comparing and choosing between things",
+  "French culture, regions, and current events"
+];
+const STORY_STYLES = [
+  "a short news item",
+  "a dialogue between two people",
+  "a personal anecdote",
+  "an email or message",
+  "a travel story",
+  "a review of a restaurant, film, or book",
+  "a how-to or set of instructions",
+  "a diary entry",
+  "a phone conversation",
+  "a short opinion piece",
+  "an announcement for a local event",
+  "a story where something goes slightly wrong"
+];
+function pickTheme() {
+  const personal = S.settings.topics.split(/[,;]/).map(s => s.trim()).filter(Boolean);
+  const pool = (Math.random() < 0.5 && personal.length) ? personal : CORE_THEMES;
+  const avoid = new Set(S.recentThemes);
+  const fresh = pool.filter(t => !avoid.has(t));
+  const list = fresh.length ? fresh : pool;
+  return list[Math.floor(Math.random() * list.length)];
+}
+function noteTheme(t) {
+  S.recentThemes.push(t);
+  if (S.recentThemes.length > 8) S.recentThemes.shift();
+  save();
+}
+
+/* ---------- official syllabus (CEFR / DELF-DALF, condensed) ---------- */
+const SYLLABUS = [
+  // A1
+  { id:"a1l1", lv:"A1", sk:"listen", t:"Recognize familiar words and very simple phrases about yourself and family in slow, clear speech" },
+  { id:"a1l2", lv:"A1", sk:"listen", t:"Understand numbers, prices, dates, and times" },
+  { id:"a1l3", lv:"A1", sk:"listen", t:"Understand very simple instructions and directions addressed to you" },
+  { id:"a1l4", lv:"A1", sk:"listen", t:"Catch the topic of a very simple, slow exchange" },
+  { id:"a1l5", lv:"A1", sk:"listen", t:"Understand very simple recorded messages and announcements" },
+  { id:"a1r1", lv:"A1", sk:"read", t:"Recognize familiar names and words on signs, posters, and menus" },
+  { id:"a1r2", lv:"A1", sk:"read", t:"Read very short, simple messages such as postcards" },
+  { id:"a1r3", lv:"A1", sk:"read", t:"Understand short, very simply worded instructions" },
+  { id:"a1r4", lv:"A1", sk:"read", t:"Get the gist of very simple informational texts" },
+  { id:"a1r5", lv:"A1", sk:"read", t:"Find basic information in simple forms and timetables" },
+  { id:"a1w1", lv:"A1", sk:"write", t:"Fill in forms with personal details" },
+  { id:"a1w2", lv:"A1", sk:"write", t:"Write a short, simple postcard or message" },
+  { id:"a1w3", lv:"A1", sk:"write", t:"Introduce yourself in simple sentences" },
+  { id:"a1w4", lv:"A1", sk:"write", t:"Describe people and places very simply" },
+  { id:"a1w5", lv:"A1", sk:"write", t:"Use numbers, dates, and times in writing" },
+  // A2
+  { id:"a2l1", lv:"A2", sk:"listen", t:"Understand phrases and high-frequency vocabulary on familiar topics" },
+  { id:"a2l2", lv:"A2", sk:"listen", t:"Catch the main point of short, clear messages and announcements" },
+  { id:"a2l3", lv:"A2", sk:"listen", t:"Follow short, simple directions" },
+  { id:"a2l4", lv:"A2", sk:"listen", t:"Understand the main information of short recorded material" },
+  { id:"a2l5", lv:"A2", sk:"listen", t:"Follow the topic of a slow, clear conversation" },
+  { id:"a2r1", lv:"A2", sk:"read", t:"Read short, simple everyday texts: ads, menus, timetables" },
+  { id:"a2r2", lv:"A2", sk:"read", t:"Understand simple personal letters and emails" },
+  { id:"a2r3", lv:"A2", sk:"read", t:"Find predictable information in everyday documents" },
+  { id:"a2r4", lv:"A2", sk:"read", t:"Understand short, simple instructions" },
+  { id:"a2r5", lv:"A2", sk:"read", t:"Understand the main points of short, simple news items" },
+  { id:"a2w1", lv:"A2", sk:"write", t:"Write short, simple notes and messages" },
+  { id:"a2w2", lv:"A2", sk:"write", t:"Write a simple personal letter: thanks, invitation, apology" },
+  { id:"a2w3", lv:"A2", sk:"write", t:"Describe your background, daily routine, and plans simply" },
+  { id:"a2w4", lv:"A2", sk:"write", t:"Write a simple account of a past event" },
+  { id:"a2w5", lv:"A2", sk:"write", t:"Fill in common everyday forms" },
+  { id:"a2w6", lv:"A2", sk:"write", t:"Express simple opinions on familiar things" },
+  // B1
+  { id:"b1l1", lv:"B1", sk:"listen", t:"Understand the main points of clear standard speech on familiar matters" },
+  { id:"b1l2", lv:"B1", sk:"listen", t:"Follow talks and presentations on familiar topics" },
+  { id:"b1l3", lv:"B1", sk:"listen", t:"Understand most radio or TV content on current affairs when delivery is clear" },
+  { id:"b1l4", lv:"B1", sk:"listen", t:"Catch specific details in announcements and instructions" },
+  { id:"b1l5", lv:"B1", sk:"listen", t:"Follow a clear conversation between native speakers" },
+  { id:"b1r1", lv:"B1", sk:"read", t:"Understand texts in everyday or job-related language" },
+  { id:"b1r2", lv:"B1", sk:"read", t:"Understand personal letters describing events, feelings, and wishes" },
+  { id:"b1r3", lv:"B1", sk:"read", t:"Find and understand relevant information in brochures and official letters" },
+  { id:"b1r4", lv:"B1", sk:"read", t:"Follow the argument of a straightforward article" },
+  { id:"b1r5", lv:"B1", sk:"read", t:"Understand clear instruction manuals" },
+  { id:"b1w1", lv:"B1", sk:"write", t:"Write simple connected text on familiar topics" },
+  { id:"b1w2", lv:"B1", sk:"write", t:"Write personal letters describing experiences and impressions" },
+  { id:"b1w3", lv:"B1", sk:"write", t:"Write short formal letters and emails" },
+  { id:"b1w4", lv:"B1", sk:"write", t:"Express an opinion with reasons" },
+  { id:"b1w5", lv:"B1", sk:"write", t:"Summarize a text and give your own view" },
+  { id:"b1w6", lv:"B1", sk:"write", t:"Narrate a story or the plot of a film and describe your reactions" },
+  { id:"b1w7", lv:"B1", sk:"write", t:"Write notes and messages conveying real information" },
+  // B2
+  { id:"b2l1", lv:"B2", sk:"listen", t:"Follow extended speech and lectures with complex lines of argument on fairly familiar topics" },
+  { id:"b2l2", lv:"B2", sk:"listen", t:"Understand most TV news and current-affairs programs" },
+  { id:"b2l3", lv:"B2", sk:"listen", t:"Understand most films in standard French" },
+  { id:"b2l4", lv:"B2", sk:"listen", t:"Identify viewpoints and attitudes in discussions" },
+  { id:"b2l5", lv:"B2", sk:"listen", t:"Understand detailed instructions" },
+  { id:"b2l6", lv:"B2", sk:"listen", t:"Follow native-speed conversation with only occasional effort" },
+  { id:"b2r1", lv:"B2", sk:"read", t:"Understand articles and reports on contemporary issues with particular viewpoints" },
+  { id:"b2r2", lv:"B2", sk:"read", t:"Read contemporary literary prose" },
+  { id:"b2r3", lv:"B2", sk:"read", t:"Select relevant information from long texts" },
+  { id:"b2r4", lv:"B2", sk:"read", t:"Understand specialized articles in your own field" },
+  { id:"b2r5", lv:"B2", sk:"read", t:"Follow argumentation and distinguish main points from supporting detail" },
+  { id:"b2r6", lv:"B2", sk:"read", t:"Understand formal and informal correspondence" },
+  { id:"b2w1", lv:"B2", sk:"write", t:"Write clear, detailed text on a wide range of subjects" },
+  { id:"b2w2", lv:"B2", sk:"write", t:"Write an essay or report developing an argument for or against a position" },
+  { id:"b2w3", lv:"B2", sk:"write", t:"Write formal letters with appropriate register: complaint, application" },
+  { id:"b2w4", lv:"B2", sk:"write", t:"Synthesize information and arguments from several sources" },
+  { id:"b2w5", lv:"B2", sk:"write", t:"Write reviews of films, books, or events" },
+  { id:"b2w6", lv:"B2", sk:"write", t:"Write detailed accounts of real or imagined events" },
+  { id:"b2w7", lv:"B2", sk:"write", t:"Structure text clearly with connectors and paragraphs" },
+  { id:"b2w8", lv:"B2", sk:"write", t:"Take usable notes from a talk or presentation" },
+  // C1
+  { id:"c1l1", lv:"C1", sk:"listen", t:"Understand extended speech even when not clearly structured and when relations are implicit" },
+  { id:"c1l2", lv:"C1", sk:"listen", t:"Understand TV and films without much effort, including some colloquial usage" },
+  { id:"c1l3", lv:"C1", sk:"listen", t:"Follow complex technical discussions in your own field" },
+  { id:"c1l4", lv:"C1", sk:"listen", t:"Identify attitude, register, and implied meaning" },
+  { id:"c1l5", lv:"C1", sk:"listen", t:"Follow fast group discussion between native speakers" },
+  { id:"c1r1", lv:"C1", sk:"read", t:"Understand long, complex factual and literary texts, appreciating style" },
+  { id:"c1r2", lv:"C1", sk:"read", t:"Understand specialized articles outside your own field" },
+  { id:"c1r3", lv:"C1", sk:"read", t:"Detect implicit meaning, irony, and tone" },
+  { id:"c1r4", lv:"C1", sk:"read", t:"Understand detailed, complex instructions" },
+  { id:"c1r5", lv:"C1", sk:"read", t:"Rapidly scan long texts for relevant detail" },
+  { id:"c1w1", lv:"C1", sk:"write", t:"Write clear, well-structured text on complex subjects, developing viewpoints at length" },
+  { id:"c1w2", lv:"C1", sk:"write", t:"Write a synthese: summarize multiple sources into one structured text (DALF style)" },
+  { id:"c1w3", lv:"C1", sk:"write", t:"Write an argued essay with rigorous structure: thesis, arguments, conclusion" },
+  { id:"c1w4", lv:"C1", sk:"write", t:"Adapt register and style to the audience" },
+  { id:"c1w5", lv:"C1", sk:"write", t:"Write formal correspondence with nuance" },
+  { id:"c1w6", lv:"C1", sk:"write", t:"Expand and support points with examples and counterarguments" },
+  { id:"c1w7", lv:"C1", sk:"write", t:"Write fluent reviews and commentary" },
+  // C2
+  { id:"c2l1", lv:"C2", sk:"listen", t:"Understand any spoken French at native speed, including idiom, with time to adjust to an accent" },
+  { id:"c2l2", lv:"C2", sk:"listen", t:"Perceive implied attitudes and relationships between speakers" },
+  { id:"c2l3", lv:"C2", sk:"listen", t:"Follow lectures and debates on abstract, complex topics" },
+  { id:"c2l4", lv:"C2", sk:"listen", t:"Understand humor, irony, and cultural reference" },
+  { id:"c2r1", lv:"C2", sk:"read", t:"Read virtually all forms of text, including abstract or linguistically complex works" },
+  { id:"c2r2", lv:"C2", sk:"read", t:"Perceive fine shades of meaning and style" },
+  { id:"c2r3", lv:"C2", sk:"read", t:"Identify implicit positions in argumentative texts" },
+  { id:"c2r4", lv:"C2", sk:"read", t:"Appreciate stylistic devices and literary technique" },
+  { id:"c2w1", lv:"C2", sk:"write", t:"Write smooth, complex, stylistically appropriate texts of all kinds" },
+  { id:"c2w2", lv:"C2", sk:"write", t:"Write critical essays and syntheses with flawless structure" },
+  { id:"c2w3", lv:"C2", sk:"write", t:"Adapt tone and register with precision" },
+  { id:"c2w4", lv:"C2", sk:"write", t:"Summarize and critique complex professional or literary texts" },
+  { id:"c2w5", lv:"C2", sk:"write", t:"Express nuance precisely throughout a long text" }
+];
+const SKILLS = ["listen", "read", "write"];
+const SKILL_NAMES = { listen: "Listening", read: "Reading", write: "Writing" };
+const LV_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"];
+const TARGET_LV = "C1"; // headline coverage target shown on Progress
+
+function goalState(id) { return S.goals[id] || 0; }
+function setGoal(id, v) {
+  if (v > goalState(id)) { S.goals[id] = v; save(); }
+}
+function goalsFor(lv, sk) { return SYLLABUS.filter(g => g.lv === lv && g.sk === sk); }
+function coverage(lv, sk) {
+  const gs = sk ? goalsFor(lv, sk) : SYLLABUS.filter(g => g.lv === lv);
+  const done = gs.filter(g => goalState(g.id) === 2).length;
+  return { done, total: gs.length };
+}
+function nextTargetGoal(sk) {
+  for (const lv of LV_ORDER) {
+    const g = goalsFor(lv, sk).find(x => goalState(x.id) < 2);
+    if (g) return g;
+  }
+  return null;
+}
+function applyPlacement(sk, lvl) {
+  const idx = LV_ORDER.indexOf(lvl);
+  if (idx === -1) return;
+  for (let i = 0; i < idx; i++) for (const g of goalsFor(LV_ORDER[i], sk)) setGoal(g.id, 2);
+  for (const g of goalsFor(lvl, sk)) setGoal(g.id, 1);
+  S.profile[sk] = lvl;
+  save();
+}
+
+/* ---------- shared marking ---------- */
+async function markTranslation(english, french, extraNote) {
+  const sys = "You are a precise, encouraging French teacher marking a translation. " + promptContext() +
+    (extraNote ? " " + extraNote : "") +
+    ' Mark the learner\'s French against the English. Respond with only JSON: ' +
+    '{"score": 0-100, "corrected": "the learner\'s answer with minimal fixes applied", ' +
+    '"errors": [{"issue": "3-6 word label", "explanation": "clear English explanation of the rule and why", "tag": "one of: ' + TAG_LIST + '"}], ' +
+    '"native": "what a native speaker would most naturally say", ' +
+    '"comment": "one short honest sentence of feedback, not gushing", ' +
+    '"vocab": [{"no": "french item", "en": "english"}]} ' +
+    "vocab holds up to 3 items the learner got wrong or was missing, worth drilling (" + vocabSpec() + "); [] if none. " +
+    "If the answer is fully correct and natural, errors is [] and score is 95-100. " +
+    "If the learner is B2 or above, also flag unnatural register or unidiomatic phrasing, not just grammar. Explanations teach; never just restate the fix.";
+  return callJSON(sys, [{ role: "user", content: "English: " + english + "\nLearner's French: " + french }], 1200);
+}
+function logErrors(j) {
+  let logged = false;
+  for (const e of (j.errors || [])) {
+    if (e.tag && e.tag !== "accents or spelling") { S.grammarLog[e.tag] = (S.grammarLog[e.tag] || 0) + 1; logged = true; }
+  }
+  if (logged) save();
+}
+function renderMarking(el, j) {
+  const score = Math.max(0, Math.min(100, j.score || 0));
+  const cls = score >= 85 ? "good" : score >= 55 ? "mid" : "low";
+  let html = '<div class="scoreline"><span class="scorebadge ' + cls + '">' + score + '</span>' +
+    '<span style="font-size:.92rem">' + esc(j.comment || "") + "</span></div>";
+  for (const e of j.errors || []) {
+    html += '<div class="errbox"><b>' + esc(e.issue) + ":</b> " + esc(e.explanation) + "</div>";
+  }
+  if (j.corrected && (j.errors || []).length) {
+    html += '<div class="notebox">Corrected: ' + esc(j.corrected) + "</div>";
+  }
+  if (j.native) html += '<div class="nativebox"><b>A native would say:</b> ' + esc(j.native) + "</div>";
+  el.innerHTML = html;
+  el.classList.add("show");
+}
+function absorbVocab(j) {
+  const gained = addCards(j.vocab);
+  if (gained) toast(gained + (gained === 1 ? " card" : " cards") + " added to your deck");
+}
+
+/* ---------- SRS (SM-2) ---------- */
+function newCard(no, en) {
+  return { id: Date.now() + "_" + Math.random().toString(36).slice(2, 7),
+    no: no.trim(), en: en.trim(), ef: 2.5, reps: 0, interval: 0, due: Date.now(), added: Date.now(), lapses: 0 };
+}
+function addCards(pairs) {
+  let added = 0;
+  for (const p of pairs || []) {
+    if (!p || !p.no || !p.en) continue;
+    const key = p.no.trim().toLowerCase();
+    if (!key || S.deck.some(c => c.no.trim().toLowerCase() === key)) continue;
+    S.deck.push(newCard(p.no, p.en));
+    added++;
+  }
+  if (added) { save(); renderVocabStats(); }
+  return added;
+}
+function gradeCard(card, q) {
+  if (q < 3) {
+    card.reps = 0; card.interval = 0;
+    card.lapses = (card.lapses || 0) + 1;
+    card.due = Date.now() + 10 * 60 * 1000;
+  } else {
+    if (card.reps === 0) card.interval = 1;
+    else if (card.reps === 1) card.interval = 6;
+    else card.interval = Math.round(card.interval * card.ef);
+    card.ef = Math.max(1.3, card.ef + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)));
+    card.reps++;
+    card.due = Date.now() + card.interval * 24 * 60 * 60 * 1000;
+  }
+  save();
+}
+function dueCards() {
+  const now = Date.now();
+  return S.deck.filter(c => c.due <= now).sort((a, b) => a.due - b.due);
+}
+function weakCards(n) {
+  return [...S.deck]
+    .sort((a, b) => ((a.ef - b.ef) || ((b.lapses || 0) - (a.lapses || 0))))
+    .slice(0, n || 15);
+}
+
+/* ---------- navigation ---------- */
+function showView(name) {
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x.dataset.view === name));
+  $("gearBtn").classList.toggle("on", name === "settings");
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  $("view-" + name).classList.add("active");
+  if (name === "vocab") { renderVocabStats(); refreshFlashQueue(); }
+  if (name === "grammar") renderGrammarPicker();
+  if (name === "settings") renderStats();
+}
+document.querySelectorAll("nav button").forEach(b => {
+  b.addEventListener("click", () => showView(b.dataset.view));
+});
+$("gearBtn").addEventListener("click", () => showView("settings"));
+$("gateBtn").addEventListener("click", () => { showView("test"); startTest(); });
+
+/* ============================================================
+   MODE 1: TRANSLATE
+   ============================================================ */
+let trCurrent = null;
+
+async function trNewSentence() {
+  const btn = $("trNew");
+  busy(btn, true, "Writing...");
+  try {
+    const avoid = S.recentEn.length ? " Avoid anything similar to these recent sentences: " + S.recentEn.join(" | ") : "";
+    const theme = pickTheme();
+    noteTheme(theme);
+    const sys = "You write one English practice sentence for a learner to translate into French. " +
+      promptContext() +
+      " Theme for this sentence: " + theme + "." +
+      " The sentence should be 8 to 20 words, natural and specific (real details, not generic filler), and include one level-appropriate challenge: at lower levels basic tenses and agreement, at B2 and above subjunctive triggers, nuanced tense choice, register, or idiom." + avoid +
+      ' Respond with only JSON: {"english":"..."}';
+    const j = await callJSON(sys, [{ role: "user", content: "One new sentence, please." }], 300);
+    if (!j.english) throw new Error("No sentence returned. Try again.");
+    trCurrent = j.english;
+    S.recentEn.push(j.english);
+    if (S.recentEn.length > 15) S.recentEn.shift();
+    save();
+    $("trEn").textContent = trCurrent;
+    $("trInput").value = "";
+    $("trResult").classList.remove("show");
+    $("trInput").focus();
+  } catch (e) { toast(e.message); }
+  busy(btn, false);
+}
+async function trCheckAnswer() {
+  const ans = $("trInput").value.trim();
+  if (!trCurrent) { toast("Get a sentence first."); return; }
+  if (!ans) { toast("Write your French translation first."); return; }
+  const btn = $("trCheck");
+  busy(btn, true, "Marking...");
+  try {
+    const j = await markTranslation(trCurrent, ans);
+    renderMarking($("trResult"), j);
+    logErrors(j);
+    absorbVocab(j);
+    addXP(Math.max(1, Math.round((j.score || 0) / 10)));
+  } catch (e) { toast(e.message); }
+  busy(btn, false);
+}
+$("trNew").addEventListener("click", trNewSentence);
+$("trCheck").addEventListener("click", trCheckAnswer);
+
+/* ============================================================
+   MODE 2: VOCABULARY
+   ============================================================ */
+let vDir = "no-en"; // "no" fields hold the French side
+let flashQueue = [];
+let flashCard = null;
+
+function renderVocabStats() {
+  const due = dueCards().length;
+  $("vStats").textContent = S.deck.length + " cards in deck, " + due + " due for review";
+  $("seedCard").style.display = S.deck.length < 10 ? "" : "none";
+}
+function dirLabel() { return vDir === "no-en" ? "French → English" : "English → French"; }
+$("vDir").addEventListener("click", () => {
+  vDir = vDir === "no-en" ? "en-no" : "no-en";
+  $("vDir").textContent = dirLabel();
+  showFlashCard();
+});
+$("vtFlash").addEventListener("click", () => switchVocabTab("flash"));
+$("vtMatch").addEventListener("click", () => switchVocabTab("match"));
+$("vtWeak").addEventListener("click", () => switchVocabTab("weak"));
+function switchVocabTab(t) {
+  $("vtFlash").classList.toggle("on", t === "flash");
+  $("vtMatch").classList.toggle("on", t === "match");
+  $("vtWeak").classList.toggle("on", t === "weak");
+  $("vFlashArea").style.display = t === "flash" ? "" : "none";
+  $("vMatchArea").style.display = t === "match" ? "" : "none";
+  $("vWeakArea").style.display = t === "weak" ? "" : "none";
+  $("vDir").parentElement.style.display = t === "weak" ? "none" : "";
+  if (t === "flash") refreshFlashQueue();
+  else if (t === "match") newMatchRound();
+  else renderWeakList();
+}
+function refreshFlashQueue() {
+  flashQueue = dueCards().slice(0, 20);
+  nextFlashCard();
+}
+function nextFlashCard() {
+  flashCard = flashQueue.shift() || null;
+  showFlashCard();
+}
+function showFlashCard() {
+  const front = $("fcFront"), back = $("fcBack");
+  back.style.display = "none";
+  $("fcGrades").classList.remove("show");
+  $("fcRevealRow").style.display = "";
+  $("fcHear").style.display = "none";
+  if (!flashCard) {
+    front.textContent = S.deck.length === 0 ? "No cards yet. Seed the starter deck below, or make some mistakes in the other modes!" : "Nothing due right now. Nice.";
+    $("fcRevealRow").style.display = "none";
+    return;
+  }
+  front.textContent = vDir === "no-en" ? flashCard.no : flashCard.en;
+  back.textContent = vDir === "no-en" ? flashCard.en : flashCard.no;
+  if (vDir === "no-en" && canSpeak()) $("fcHear").style.display = "";
+}
+$("fcHear").addEventListener("click", () => flashCard && speak(flashCard.no, 1));
+$("fcReveal").addEventListener("click", () => {
+  if (!flashCard) return;
+  $("fcBack").style.display = "";
+  $("fcRevealRow").style.display = "none";
+  $("fcGrades").classList.add("show");
+  if (canSpeak()) $("fcHear").style.display = "";
+});
+document.querySelectorAll("#fcGrades button").forEach(b => {
+  b.addEventListener("click", () => {
+    if (!flashCard) return;
+    const q = parseInt(b.dataset.g, 10);
+    gradeCard(flashCard, q);
+    if (q === 0) flashQueue.push(flashCard);
+    addXP(q >= 4 ? 2 : 1);
+    renderVocabStats();
+    nextFlashCard();
+  });
+});
+$("fcPractice").addEventListener("click", () => {
+  if (S.deck.length === 0) { toast("The deck is empty. Seed it first."); return; }
+  flashQueue = [...S.deck].sort(() => Math.random() - 0.5).slice(0, 10);
+  nextFlashCard();
+});
+
+/* ----- matching pairs ----- */
+let mCards = [], mSel = null, mWrong = {}, mDone = 0;
+function newMatchRound() {
+  const due = dueCards();
+  const pool = due.length >= 5 ? due : [...S.deck].sort(() => Math.random() - 0.5);
+  mCards = pool.slice(0, 5);
+  mSel = null; mWrong = {}; mDone = 0;
+  const grid = $("mGrid");
+  grid.innerHTML = "";
+  $("mHint").textContent = "";
+  if (mCards.length < 2) {
+    $("mHint").textContent = "You need at least 2 cards in the deck for matching. Seed the starter deck in Cards.";
+    return;
+  }
+  const left = [...mCards].sort(() => Math.random() - 0.5);
+  const right = [...mCards].sort(() => Math.random() - 0.5);
+  const leftKey = vDir === "no-en" ? "no" : "en";
+  const rightKey = vDir === "no-en" ? "en" : "no";
+  for (let i = 0; i < left.length; i++) {
+    grid.appendChild(matchBtn(left[i], leftKey, "L"));
+    grid.appendChild(matchBtn(right[i], rightKey, "R"));
+  }
+}
+function matchBtn(card, key, side) {
+  const b = document.createElement("button");
+  b.textContent = card[key];
+  b.dataset.id = card.id;
+  b.dataset.side = side;
+  b.addEventListener("click", () => matchTap(b, card));
+  return b;
+}
+function matchTap(btn, card) {
+  if (btn.classList.contains("done")) return;
+  if (!mSel) { mSel = btn; btn.classList.add("sel"); return; }
+  if (mSel === btn) { btn.classList.remove("sel"); mSel = null; return; }
+  if (mSel.dataset.side === btn.dataset.side) {
+    mSel.classList.remove("sel"); mSel = btn; btn.classList.add("sel"); return;
+  }
+  const a = mSel;
+  mSel = null;
+  a.classList.remove("sel");
+  if (a.dataset.id === btn.dataset.id) {
+    a.classList.add("done"); btn.classList.add("done");
+    mDone++;
+    const c = S.deck.find(x => x.id === card.id);
+    if (c) gradeCard(c, mWrong[card.id] ? 3 : 4);
+    addXP(1);
+    if (mDone === mCards.length) {
+      $("mHint").textContent = "Round complete! Tap New round to keep going.";
+      renderVocabStats();
+    }
+  } else {
+    mWrong[a.dataset.id] = true;
+    mWrong[btn.dataset.id] = true;
+    a.classList.add("wrong"); btn.classList.add("wrong");
+    setTimeout(() => { a.classList.remove("wrong"); btn.classList.remove("wrong"); }, 450);
+  }
+}
+$("mNew").addEventListener("click", newMatchRound);
+
+/* ----- weak words ----- */
+function renderWeakList() {
+  const list = $("weakList");
+  list.innerHTML = "";
+  const weak = weakCards(15).filter(c => (c.lapses || 0) > 0 || c.ef < 2.5);
+  const rows = weak.length ? weak : weakCards(10);
+  if (S.deck.length === 0) {
+    list.innerHTML = '<span class="hint">The deck is empty. Seed it in the Cards tab first.</span>';
+    return;
+  }
+  if (!weak.length) {
+    list.insertAdjacentHTML("beforeend", '<div class="hint" style="margin-bottom:8px">Nothing has beaten you yet. Here are your newest cards instead:</div>');
+  }
+  for (const c of rows) {
+    const row = document.createElement("div");
+    row.className = "weakrow";
+    row.innerHTML = '<span class="w-no">' + esc(c.no) + '</span><span class="w-en">' + esc(c.en) + '</span>' +
+      '<span class="w-meta">' + (c.lapses ? c.lapses + "x missed" : "") + "</span>";
+    if (canSpeak()) {
+      const h = document.createElement("button");
+      h.className = "w-hear";
+      h.innerHTML = "&#128266;";
+      h.addEventListener("click", () => speak(c.no, 1));
+      row.appendChild(h);
+    }
+    list.appendChild(row);
+  }
+}
+$("weakDrill").addEventListener("click", () => {
+  const weak = weakCards(15);
+  if (!weak.length) { toast("No cards to drill yet."); return; }
+  flashQueue = weak;
+  switchVocabTab("flash");
+  nextFlashCard();
+  toast("Drilling your " + weak.length + " toughest cards");
+});
+$("weakPhrase").addEventListener("click", async () => {
+  const weak = weakCards(5);
+  if (weak.length < 2) { toast("Not enough tricky words yet."); return; }
+  const btn = $("weakPhrase");
+  busy(btn, true, "Building...");
+  try {
+    const words = weak.map(c => c.no + " (" + c.en + ")").join(", ");
+    const sys = "You build contextual flashcards for a French learner. " + promptContext() +
+      " For each given word, write one short natural French phrase of 3 to 6 words that uses the word in a typical context, with its English meaning." +
+      ' Respond with only JSON: {"cards":[{"no":"phrase","en":"english"}]}';
+    const j = await callJSON(sys, [{ role: "user", content: "Words: " + words }], 900);
+    const n = addCards(j.cards);
+    toast(n ? n + " phrase cards added" : "No new cards (duplicates skipped)");
+    renderWeakList();
+  } catch (e) { toast(e.message); }
+  busy(btn, false);
+});
+
+/* ----- seed starter deck ----- */
+$("seedBtn").addEventListener("click", async () => {
+  const btn = $("seedBtn");
+  busy(btn, true, "Building deck...");
+  try {
+    const phraseBit = S.settings.cardStyle === "phrases" ? " About a third of the cards should be short natural phrases of 2 to 5 words rather than single words." : "";
+    const basics = cefrLabel(S.level) === "A1" ? "" : " No absolute beginner words (not bonjour, merci, oui).";
+    const sys = "You build a starter flashcard deck for a French learner. " + promptContext() +
+      " Create exactly 30 cards: about 20 high-frequency items slightly above the learner's comfort zone, and about 10 drawn from the learner's topics." + basics + phraseBit +
+      ' Respond with only JSON: {"cards":[{"no":"french","en":"english"}]}';
+    const j = await callJSON(sys, [{ role: "user", content: "Build my starter deck." }], 2500);
+    const n = addCards(j.cards);
+    toast(n + " cards added");
+    renderVocabStats();
+    refreshFlashQueue();
+  } catch (e) { toast(e.message); }
+  busy(btn, false);
+});
+/* ============================================================
+   MODE 3: GRAMMAR
+   ============================================================ */
+const GRAMMAR_TOPICS = [
+  "Gender and articles (le, la, un, une, des)",
+  "Present tense: -er, -ir, and -re verbs",
+  "Passé composé vs. imparfait",
+  "Future and conditional",
+  "The subjunctive",
+  "Object pronouns (le, la, lui, y, en)",
+  "Negation (ne... pas, jamais, que)",
+  "Question formation and inversion",
+  "Relative pronouns (qui, que, dont, où)",
+  "Agreement of the past participle",
+  "Prepositions (à, de, en, dans, chez)",
+  "Comparatives and superlatives",
+  "Reported speech",
+  "Register: tu vs. vous, formal and informal style"
+];
+let gExercises = [], gIndex = 0, gTopic = "";
+
+function renderGrammarPicker() {
+  $("gPicker").style.display = "";
+  $("gArea").style.display = "none";
+  const mist = $("gMistakes");
+  const tags = Object.entries(S.grammarLog).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  mist.innerHTML = "";
+  if (!tags.length) {
+    mist.innerHTML = '<span class="hint">Do a few Translate or Listening exercises and your recurring error patterns will show up here.</span>';
+  } else {
+    for (const [tag, count] of tags) {
+      const b = document.createElement("button");
+      b.className = "chip warn";
+      b.textContent = tag + " (" + count + "x)";
+      b.addEventListener("click", () => startDrill(tag, b));
+      mist.appendChild(b);
+    }
+  }
+  const top = $("gTopics");
+  top.innerHTML = "";
+  for (const t of GRAMMAR_TOPICS) {
+    const b = document.createElement("button");
+    b.className = "chip";
+    b.textContent = t;
+    b.addEventListener("click", () => startDrill(t, b));
+    top.appendChild(b);
+  }
+}
+async function startDrill(topic, btn) {
+  busy(btn, true, "Preparing...");
+  try {
+    const sys = "You are a French teacher creating a focused mini-lesson and drill. " + promptContext() +
+      " Topic: " + topic + ". Write a compact lesson (120 to 180 words of English, with French examples inline) that explains the rule and the most common trap for English speakers. Then write 5 English sentences to translate into French, each specifically exercising this topic, easiest first, pitched at the learner's level." +
+      ' Respond with only JSON: {"lesson":"...","exercises":[{"english":"..."}]}';
+    const j = await callJSON(sys, [{ role: "user", content: "Teach me: " + topic }], 1800);
+    if (!j.exercises || !j.exercises.length) throw new Error("No exercises returned. Try again.");
+    gTopic = topic;
+    gExercises = j.exercises;
+    gIndex = 0;
+    $("gTitle").textContent = topic;
+    $("gLesson").textContent = j.lesson || "";
+    $("gPicker").style.display = "none";
+    $("gArea").style.display = "";
+    showDrillItem();
+  } catch (e) { toast(e.message); }
+  busy(btn, false);
+}
+function showDrillItem() {
+  const ex = gExercises[gIndex];
+  $("gProg").textContent = "Exercise " + (gIndex + 1) + " of " + gExercises.length;
+  $("gExPrompt").textContent = ex.english;
+  $("gInput").value = "";
+  $("gResult").classList.remove("show");
+  $("gCheck").style.display = "";
+  $("gNext").style.display = "none";
+}
+$("gCheck").addEventListener("click", async () => {
+  const ans = $("gInput").value.trim();
+  if (!ans) { toast("Write your French first."); return; }
+  const btn = $("gCheck");
+  busy(btn, true, "Marking...");
+  try {
+    const j = await markTranslation(gExercises[gIndex].english, ans,
+      "This is a grammar drill on: " + gTopic + ". Pay special attention to that topic in your marking.");
+    renderMarking($("gResult"), j);
+    logErrors(j);
+    absorbVocab(j);
+    addXP(Math.max(1, Math.round((j.score || 0) / 10)));
+    $("gCheck").style.display = "none";
+    $("gNext").style.display = "";
+    $("gNext").textContent = gIndex + 1 < gExercises.length ? "Next" : "Finish";
+  } catch (e) { toast(e.message); }
+  busy(btn, false);
+});
+$("gNext").addEventListener("click", () => {
+  gIndex++;
+  if (gIndex < gExercises.length) showDrillItem();
+  else { toast("Drill complete!"); renderGrammarPicker(); }
+});
+$("gBack").addEventListener("click", renderGrammarPicker);
+
+/* ============================================================
+   MODE 4: READING
+   ============================================================ */
+let rdCurrent = null, rdAnswered = 0, rdCorrect = 0;
+
+function readTargetWords() { return Math.min(260, 40 + Math.round(S.level * 0.75)); }
+
+$("rdNew").addEventListener("click", async () => {
+  const btn = $("rdNew");
+  busy(btn, true, "Writing...");
+  try {
+    const style = STORY_STYLES[Math.floor(Math.random() * STORY_STYLES.length)];
+    const theme = pickTheme();
+    noteTheme(theme);
+    const band = cefrLabel(S.level);
+    const richness = (band === "B2" || band === "C1" || band === "C2")
+      ? " At this level the text should have real argumentative or narrative depth, varied tenses, and some idiomatic language."
+      : "";
+    const sys = "You write a French reading text with comprehension questions. " + promptContext() +
+      " Format: " + style + ". Theme: " + theme + ". About " + readTargetWords() + " words, level-appropriate." + richness +
+      " Make it specific and lively, with concrete details such as names, numbers, times, and places. Absolutely avoid generic everyday filler. A little humor or tension is welcome. " +
+      "Then 3 multiple-choice comprehension questions IN FRENCH, each with exactly 3 options and one correct answer. Make wrong options plausible. " +
+      ' Respond with only JSON: {"passage":"...","questions":[{"q":"...","options":["...","...","..."],"answer":0,"why":"one short English sentence explaining the answer"}]}';
+    const j = await callJSON(sys, [{ role: "user", content: "One new reading text, please." }], 2600);
+    if (!j.passage || !j.questions) throw new Error("No text returned. Try again.");
+    rdCurrent = j; rdAnswered = 0; rdCorrect = 0;
+    renderReading();
+  } catch (e) { toast(e.message); }
+  busy(btn, false);
+});
+function renderReading() {
+  $("rdArea").style.display = "";
+  $("rdScore").style.display = "none";
+  $("rdLookup").style.display = "none";
+  const p = $("rdPassage");
+  p.innerHTML = "";
+  rdCurrent.passage.split(/(\s+)/).forEach(tok => {
+    if (!tok) return;
+    if (/^\s+$/.test(tok)) { p.appendChild(document.createTextNode(tok)); return; }
+    const span = document.createElement("span");
+    span.className = "w";
+    span.textContent = tok;
+    span.addEventListener("click", () => lookupWord(tok, span));
+    p.appendChild(span);
+  });
+  const qs = $("rdQs");
+  qs.innerHTML = "";
+  rdCurrent.questions.forEach((q, qi) => {
+    const block = document.createElement("div");
+    block.className = "qblock";
+    block.innerHTML = '<div class="qtext">' + (qi + 1) + ". " + esc(q.q) + "</div>";
+    const opts = document.createElement("div");
+    opts.className = "opts";
+    q.options.forEach((opt, oi) => {
+      const b = document.createElement("button");
+      b.textContent = opt;
+      b.addEventListener("click", () => answerReading(q, oi, opts, why));
+      opts.appendChild(b);
+    });
+    const why = document.createElement("div");
+    why.className = "why";
+    why.textContent = q.why || "";
+    block.appendChild(opts);
+    block.appendChild(why);
+    qs.appendChild(block);
+  });
+}
+function answerReading(q, chosen, optsEl, whyEl) {
+  if (optsEl.dataset.done) return;
+  optsEl.dataset.done = "1";
+  const btns = optsEl.querySelectorAll("button");
+  btns.forEach((b, i) => {
+    b.disabled = true;
+    if (i === q.answer) b.classList.add("correct");
+    else if (i === chosen) b.classList.add("incorrect");
+  });
+  whyEl.classList.add("show");
+  rdAnswered++;
+  if (chosen === q.answer) rdCorrect++;
+  if (rdAnswered === rdCurrent.questions.length) {
+    const sc = $("rdScore");
+    sc.style.display = "";
+    sc.innerHTML = "<b>" + rdCorrect + " of " + rdCurrent.questions.length + " correct.</b> " +
+      (rdCorrect === 3 ? "Full marks." : rdCorrect === 2 ? "Solid." : "Tough one; look up the words that threw you and try another.");
+    addXP(1 + rdCorrect * 3);
+  }
+}
+$("rdPlay").addEventListener("click", () => rdCurrent && speakLong(rdCurrent.passage, 1));
+$("rdSlow").addEventListener("click", () => rdCurrent && speakLong(rdCurrent.passage, 0.72));
+
+let lookupBusy = false;
+async function lookupWord(token, span) {
+  if (lookupBusy) return;
+  const word = token.replace(/^[^\p{L}\p{N}'’-]+|[^\p{L}\p{N}'’-]+$/gu, "");
+  if (!word) return;
+  document.querySelectorAll(".passage .w.selword").forEach(x => x.classList.remove("selword"));
+  span.classList.add("selword");
+  const box = $("rdLookup");
+  box.style.display = "";
+  box.innerHTML = "Looking up <b>" + esc(word) + "</b>...";
+  lookupBusy = true;
+  try {
+    const idx = rdCurrent.passage.indexOf(token);
+    const context = rdCurrent.passage.slice(Math.max(0, idx - 120), idx + 140);
+    const sys = "You are a French-English dictionary that understands context. " +
+      "Given a French word and the sentence it appears in, explain it. Use US spelling. Never use em dashes. " +
+      ' Respond with only JSON: {"no":"the dictionary (base) form","en":"meaning in this exact context","note":"very short grammar note, e.g. feminine noun; passé composé of prendre; subjunctive"}';
+    const j = await callJSON(sys, [{ role: "user", content: "Word: " + word + "\nContext: ..." + context + "..." }], 300);
+    box.innerHTML = "<b>" + esc(j.no || word) + "</b> = " + esc(j.en || "?") +
+      (j.note ? '<br><span style="font-size:.82rem">' + esc(j.note) + "</span>" : "");
+    const add = document.createElement("button");
+    add.className = "addbtn";
+    add.textContent = "Add to deck";
+    add.addEventListener("click", () => {
+      const n = addCards([{ no: j.no || word, en: j.en || "" }]);
+      toast(n ? "Added to deck" : "Already in your deck");
+    });
+    box.appendChild(document.createElement("br"));
+    box.appendChild(add);
+  } catch (e) {
+    box.innerHTML = "Lookup failed: " + esc(e.message);
+  }
+  lookupBusy = false;
+}
+
+/* ============================================================
+   MODE 5: LISTENING
+   ============================================================ */
+let liCurrent = null;
+let noVoice = null;
+
+function canSpeak() { return !!window.speechSynthesis; }
+function pickVoices() {
+  const voices = canSpeak() ? speechSynthesis.getVoices() : [];
+  const fr = voices.filter(v => /^fr/i.test(v.lang));
+  const sel = $("sVoice");
+  sel.innerHTML = "";
+  if (fr.length === 0) {
+    sel.innerHTML = "<option value=''>No French voice found on this device</option>";
+    noVoice = null;
+    return;
+  }
+  for (const v of fr) {
+    const o = document.createElement("option");
+    o.value = v.voiceURI;
+    o.textContent = v.name + " (" + v.lang + ")";
+    sel.appendChild(o);
+  }
+  const saved = fr.find(v => v.voiceURI === S.settings.voiceURI);
+  noVoice = saved || fr.find(v => /^fr[-_]FR/i.test(v.lang)) || fr[0];
+  sel.value = noVoice.voiceURI;
+}
+if (window.speechSynthesis) speechSynthesis.onvoiceschanged = pickVoices;
+
+function speak(text, rate) {
+  if (!canSpeak()) { toast("This browser has no speech synthesis."); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "fr-FR";
+  if (noVoice) u.voice = noVoice;
+  u.rate = rate || 1;
+  speechSynthesis.speak(u);
+}
+function speakLong(text, rate) {
+  if (!canSpeak()) { toast("This browser has no speech synthesis."); return; }
+  speechSynthesis.cancel();
+  const parts = text.match(/[^.!?]+[.!?]*/g) || [text];
+  for (const part of parts) {
+    const s = part.trim();
+    if (!s) continue;
+    const u = new SpeechSynthesisUtterance(s);
+    u.lang = "fr-FR";
+    if (noVoice) u.voice = noVoice;
+    u.rate = rate || 1;
+    speechSynthesis.speak(u);
+  }
+}
+function lvListenSpec(lv) {
+  if (lv === "A1") return "One very simple sentence of 5 to 7 common words.";
+  if (lv === "A2") return "One clear sentence of 9 to 12 words.";
+  if (lv === "B1") return "Two connected sentences totaling about 18 words.";
+  if (lv === "B2") return "Three connected sentences totaling about 30 words, with natural phrasing.";
+  if (lv === "C1") return "A short passage of about 45 words with some idiomatic language.";
+  return "A dense passage of about 55 words with idiomatic and abstract language.";
+}
+async function liNewSentence() {
+  const btn = $("liNew");
+  busy(btn, true, "Writing...");
+  try {
+    const theme = pickTheme();
+    noteTheme(theme);
+    const sys = "You write French for a listening dictation exercise. " + promptContext() +
+      " Theme: " + theme + ". " + lvListenSpec(cefrLabel(S.level)) + " Natural spoken French, specific rather than generic." +
+      ' Respond with only JSON: {"norwegian":"the french text","english":"english meaning"}';
+    const j = await callJSON(sys, [{ role: "user", content: "One new dictation item." }], 500);
+    if (!j.norwegian) throw new Error("No sentence returned. Try again.");
+    liCurrent = j;
+    $("liInput").value = "";
+    $("liResult").classList.remove("show");
+    $("liPlay").disabled = false;
+    $("liSlow").disabled = false;
+    $("liCheck").disabled = false;
+    $("liHint").textContent = "Ready. Tap Play, listen, and type what you heard.";
+  } catch (e) { toast(e.message); }
+  busy(btn, false);
+}
+async function liCheckAnswer() {
+  const ans = $("liInput").value.trim();
+  if (!liCurrent) return;
+  if (!ans) { toast("Type what you heard first."); return; }
+  const btn = $("liCheck");
+  busy(btn, true, "Marking...");
+  try {
+    const sys = "You mark a French listening dictation. " + promptContext() +
+      " Compare what the learner typed to the actual text. Small accent slips matter less than missed or wrong words. " +
+      ' Respond with only JSON: {"score":0-100,' +
+      '"errors":[{"issue":"3-6 word label","explanation":"what was missed or misheard and why it matters, in English","tag":"one of: ' + TAG_LIST + '"}],' +
+      '"comment":"one short honest sentence",' +
+      '"vocab":[{"no":"...","en":"..."}]} ' +
+      "vocab holds up to 3 missed items worth drilling (" + vocabSpec() + "); [] if none.";
+    const j = await callJSON(sys, [{ role: "user", content: "Actual text: " + liCurrent.norwegian + "\nLearner typed: " + ans }], 1000);
+    renderMarking($("liResult"), j);
+    $("liResult").insertAdjacentHTML("beforeend",
+      '<div class="nativebox"><b>The text was:</b> ' + esc(liCurrent.norwegian) +
+      '<br><span style="font-size:.85rem">' + esc(liCurrent.english || "") + "</span></div>");
+    logErrors(j);
+    absorbVocab(j);
+    addXP(Math.max(1, Math.round((j.score || 0) / 10)));
+  } catch (e) { toast(e.message); }
+  busy(btn, false);
+}
+$("liNew").addEventListener("click", liNewSentence);
+$("liPlay").addEventListener("click", () => liCurrent && speak(liCurrent.norwegian, 1));
+$("liSlow").addEventListener("click", () => liCurrent && speak(liCurrent.norwegian, 0.72));
+$("liCheck").addEventListener("click", liCheckAnswer);
+
+/* ============================================================
+   MODE 6: CONVERSATION (with optional dictation mic)
+   ============================================================ */
+let chatHistory = [];
+let chatBusy = false;
+
+function chatBubble(cls, html) {
+  const d = document.createElement("div");
+  d.className = "msg " + cls;
+  d.innerHTML = html;
+  $("chatLog").appendChild(d);
+  d.scrollIntoView({ behavior: "smooth", block: "end" });
+}
+function chatSystem() {
+  return "You are Chloé, a warm French conversation partner. Use tu. " + promptContext() +
+    " Reply in natural French pitched at the learner's level, 1 to 3 sentences, and keep the conversation moving; ask a question roughly every other turn. Vary topics using the learner's interests. " +
+    ' Respond with only JSON: {"reply":"your French reply","correction":""} ' +
+    "If the learner's most recent message contains French errors, set correction to a brief English note: the main error, why it's wrong, and the natural phrasing. If the learner is B2 or above, correct register slips and unidiomatic phrasing too, not just grammar. If the French was fine, correction is an empty string. Ignore trivial typos.";
+}
+async function chatSend(userText) {
+  if (chatBusy) return;
+  chatBusy = true;
+  const btn = $("chSend");
+  busy(btn, true, "...");
+  try {
+    if (userText) chatHistory.push({ role: "user", content: userText });
+    else chatHistory.push({ role: "user", content: "(Start the conversation with a friendly opener.)" });
+    const recent = chatHistory.slice(-12);
+    const j = await callJSON(chatSystem(), recent, 800);
+    chatHistory.push({ role: "assistant", content: JSON.stringify(j) });
+    if (userText && j.correction) chatBubble("corr", "<b>Note:</b> " + esc(j.correction));
+    chatBubble("ai", esc(j.reply || "..."));
+    if (userText) addXP(2);
+  } catch (e) {
+    chatHistory.pop();
+    toast(e.message);
+  }
+  busy(btn, false);
+  chatBusy = false;
+}
+$("chSend").addEventListener("click", () => {
+  const t = $("chInput").value.trim();
+  if (!t) { if (chatHistory.length === 0) chatSend(null); return; }
+  chatBubble("me", esc(t));
+  $("chInput").value = "";
+  chatSend(t);
+});
+$("chInput").addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("chSend").click(); }
+});
+$("chReset").addEventListener("click", () => {
+  chatHistory = [];
+  $("chatLog").innerHTML = "";
+  chatSend(null);
+});
+
+/* ----- speech recognition (dictate into chat) ----- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recActive = false;
+if (SR) {
+  $("chMic").style.display = "";
+  $("chMic").addEventListener("click", () => {
+    if (recActive) return;
+    const rec = new SR();
+    rec.lang = "fr-FR";
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+    recActive = true;
+    $("chMic").classList.add("rec");
+    rec.onresult = ev => {
+      const text = ev.results[0][0].transcript;
+      const cur = $("chInput").value;
+      $("chInput").value = (cur ? cur + " " : "") + text;
+    };
+    rec.onerror = ev => {
+      if (ev.error === "not-allowed") toast("Microphone access was blocked. Allow it in your browser settings.");
+      else toast("Speech recognition problem: " + ev.error);
+    };
+    rec.onend = () => {
+      recActive = false;
+      $("chMic").classList.remove("rec");
+    };
+    try { rec.start(); } catch (e) { recActive = false; $("chMic").classList.remove("rec"); }
+  });
+}
+/* ============================================================
+   ASSESSMENT ENGINE: checkpoint tests + placement test
+   Placement ladder covers A1 through C1 (C2 is verified later
+   through checkpoints; it is exam-grade and earned, not placed).
+   ============================================================ */
+let T = { mode: null, items: [], idx: 0, scores: [], cur: null };
+let pl = null;
+
+function lvReadWords(lv) {
+  return { A1: 35, A2: 60, B1: 100, B2: 150, C1: 200, C2: 250 }[lv] || 100;
+}
+const WRITE_PROMPTS = {
+  A1: ["Introduce yourself in French: your name, where you live, and one thing you like. 2 to 3 sentences.",
+       "Write a very short message to a friend saying you will arrive at 6 o'clock and asking what to bring. 2 sentences."],
+  A2: ["Describe what you did last weekend. 3 to 4 sentences in French.",
+       "Write a short message inviting a friend to lunch on Friday, suggesting a time and place. 3 sentences.",
+       "Describe your daily routine simply. 3 to 4 sentences."],
+  B1: ["Do you prefer city life or country life? Give your opinion with two reasons. 4 to 6 sentences in French.",
+       "Describe a trip you remember well, with some detail about what happened and how it felt. 4 to 6 sentences.",
+       "Write a short formal email asking for information about a French course: dates, price, how to register. 4 to 5 sentences."],
+  B2: ["Some people say social media does more harm than good. Write a short argued paragraph for or against, with two developed reasons and a conclusion. 6 to 8 sentences in French.",
+       "Write a formal letter of complaint about a train journey that went wrong: what happened, why it was unacceptable, what you expect. 6 to 8 sentences.",
+       "Review a film or book you know well: brief summary, strengths, weaknesses, recommendation. 6 to 8 sentences."],
+  C1: ["Should remote work become the norm? Write a structured mini-essay: a clear thesis, two developed arguments with examples, one counterargument addressed, and a conclusion. 8 to 12 sentences in French.",
+       "Write a formal proposal to your town hall suggesting an improvement to local life, anticipating objections and justifying the cost. 8 to 12 sentences.",
+       "Summarize the main arguments for and against banning cars from city centers, then give your own nuanced position. 8 to 12 sentences."],
+  C2: ["Write a polished short commentary on this claim: true mastery of a language means mastering its silences and understatements. Take a position with precision and style. 8 to 12 sentences in French.",
+       "Write a critical review of a cultural work you admire, analyzing not just what it does but how it achieves its effect. 8 to 12 sentences."]
+};
+
+async function genListenItem(lv, goalText) {
+  const sys = "You write French for a listening dictation test item at CEFR level " + lv + ". " + promptContext() +
+    " " + lvListenSpec(lv) +
+    (goalText ? " The item should exercise this curriculum goal: " + goalText + "." : "") +
+    ' Respond with only JSON: {"norwegian":"the french text"}';
+  return callJSON(sys, [{ role: "user", content: "One dictation item." }], 400);
+}
+async function genReadItem(lv, goalText) {
+  const sys = "You write a French reading test item at CEFR level " + lv + ". " + promptContext() +
+    " A text of about " + lvReadWords(lv) + " words" +
+    (goalText ? ", in a format that exercises this curriculum goal: " + goalText : ", on an everyday topic") +
+    ". Then 2 multiple-choice comprehension questions IN FRENCH, each with exactly 3 options and one correct answer." +
+    ' Respond with only JSON: {"passage":"...","questions":[{"q":"...","options":["...","...","..."],"answer":0,"why":"one short English sentence"}]}';
+  return callJSON(sys, [{ role: "user", content: "One reading item." }], 1600);
+}
+async function genWriteItem(lv, goalText) {
+  if (!goalText) {
+    const arr = WRITE_PROMPTS[lv] || WRITE_PROMPTS.B1;
+    return { task: arr[Math.floor(Math.random() * arr.length)] };
+  }
+  const sys = "You create one short writing task (written in English) for a French test at CEFR level " + lv + ". " + promptContext() +
+    " The task must test this curriculum goal: " + goalText + ". Tell the learner what to write in French and roughly how many sentences." +
+    ' Respond with only JSON: {"task":"..."}';
+  return callJSON(sys, [{ role: "user", content: "One writing task." }], 300);
+}
+async function markWriting(task, answer, lv) {
+  const sys = "You are a strict but fair French examiner (DELF/DALF style) marking a short writing task against CEFR level " + lv + ". " + promptContext() +
+    ' Respond with only JSON: {"score":0-100,"cefr":"your estimate of the CEFR level of this writing: A1, A2, B1, B2, C1, or C2",' +
+    '"comment":"one short honest sentence",' +
+    '"errors":[{"issue":"3-6 word label","explanation":"clear English explanation","tag":"one of: ' + TAG_LIST + '"}],' +
+    '"native":"a natural model answer in 2-4 sentences"} ' +
+    "Score 70+ means the writing clearly meets the " + lv + " requirement of the task, including register and idiomaticity at B2 and above.";
+  return callJSON(sys, [{ role: "user", content: "Task: " + task + "\nLearner's French: " + answer }], 1400);
+}
+async function markDictation(actual, typed) {
+  const sys = "You mark a French dictation, strictly but fairly. " + promptContext() +
+    ' Respond with only JSON: {"score":0-100,"comment":"one short sentence","errors":[{"issue":"...","explanation":"..."}]}';
+  const j = await callJSON(sys, [{ role: "user", content: "Actual: " + actual + "\nLearner typed: " + typed }], 800);
+  j.native = "The text was: " + actual;
+  return j;
+}
+
+function resetTestUI() {
+  $("tResult").classList.remove("show");
+  $("tSummary").style.display = "none";
+  $("tInput").value = "";
+  $("tInput").style.display = "";
+  $("tCheck").style.display = "";
+  $("tNext").style.display = "none";
+  $("tAudioRow").style.display = "none";
+  $("tOpts").style.display = "none";
+  $("tReadArea").style.display = "none";
+  $("tReadArea").innerHTML = "";
+}
+
+/* ----- checkpoint ----- */
+function startTest() {
+  if (!S.gate.pending) {
+    resetTestUI();
+    $("tHead").textContent = "Checkpoint test";
+    $("tPrompt").textContent = "No checkpoint is due right now. Keep practicing!";
+    $("tInput").style.display = "none";
+    $("tCheck").style.display = "none";
+    $("tProg").textContent = "";
+    return;
+  }
+  T = { mode: "checkpoint", items: [], idx: 0, scores: [], cur: null };
+  const canListen = canSpeak() && noVoice;
+  T.items = [
+    { kind: "trans" },
+    canListen ? { kind: "listen", goal: nextTargetGoal("listen") } : { kind: "trans" },
+    { kind: "read", goal: nextTargetGoal("read") },
+    { kind: "write", goal: nextTargetGoal("write") },
+    S.deck.length >= 4 ? { kind: "vocab" } : { kind: "trans" }
+  ];
+  $("tHead").textContent = "Checkpoint test: level " + S.gate.level;
+  renderTestItem();
+}
+
+/* ----- placement: adaptive ladder starting at B1 ----- */
+function startPlacement() {
+  const skList = SKILLS.filter(sk => sk !== "listen" || (canSpeak() && noVoice));
+  pl = { skList, si: 0, stage: "B1", history: {}, levels: {} };
+  T = { mode: "placement", items: [], idx: 0, scores: [], cur: null };
+  $("tHead").textContent = "Placement test";
+  buildPlacementItem();
+}
+function buildPlacementItem() {
+  const sk = pl.skList[pl.si];
+  T.items.push({ kind: sk, lv: pl.stage, placement: true });
+  renderTestItem();
+}
+function plRecord(score) {
+  const sk = pl.skList[pl.si];
+  const pass = score >= 70;
+  const stage = pl.stage;
+  let result = null;
+  if (stage === "B1") pl.stage = pass ? "C1" : "A2";
+  else if (stage === "C1") { if (pass) result = "C1"; else pl.stage = "B2"; }
+  else if (stage === "B2") result = pass ? "B2" : "B1";
+  else if (stage === "A2") result = pass ? "A2" : "A1";
+  if (result) {
+    pl.levels[sk] = result;
+    pl.si++;
+    pl.stage = "B1";
+  }
+}
+function plHasMore() { return pl.si < pl.skList.length; }
+
+/* ----- shared rendering ----- */
+async function renderTestItem() {
+  const it = T.items[T.idx];
+  T.cur = it;
+  resetTestUI();
+  const label = T.mode === "checkpoint"
+    ? "Question " + (T.idx + 1) + " of " + T.items.length + (it.goal ? "  |  Goal: " + it.goal.t : "")
+    : "Question " + (T.idx + 1) + " of up to " + (pl.skList.length * 3) + "  |  " + SKILL_NAMES[it.kind] + ", level " + it.lv;
+  $("tProg").textContent = label;
+  $("tPrompt").textContent = "Preparing...";
+  const lv = it.lv || (it.goal ? it.goal.lv : cefrLabel(S.level));
+  try {
+    if (it.kind === "trans") {
+      const sys = "You write one English sentence for a French checkpoint test. " + promptContext() +
+        ' 8 to 20 words, testing level-appropriate grammar. Respond with only JSON: {"english":"..."}';
+      const j = await callJSON(sys, [{ role: "user", content: "One test sentence." }], 300);
+      it.english = j.english;
+      $("tPrompt").textContent = "Translate to French: " + j.english;
+    } else if (it.kind === "listen") {
+      const j = await genListenItem(lv, it.goal && it.goal.t);
+      it.norwegian = j.norwegian;
+      $("tPrompt").textContent = "Listen and type what you hear:";
+      $("tAudioRow").style.display = "";
+    } else if (it.kind === "read") {
+      const j = await genReadItem(lv, it.goal && it.goal.t);
+      it.read = j;
+      it.readScore = 0; it.readAnswered = 0;
+      $("tPrompt").textContent = "Read the text and answer the questions:";
+      $("tInput").style.display = "none";
+      $("tCheck").style.display = "none";
+      renderTestRead(it);
+    } else if (it.kind === "write") {
+      const j = await genWriteItem(lv, it.goal && it.goal.t);
+      it.task = j.task;
+      $("tPrompt").textContent = j.task;
+    } else if (it.kind === "vocab") {
+      renderVocabItem(it);
+    }
+  } catch (e) {
+    toast(e.message);
+    $("tPrompt").textContent = "Could not load this question. Tap Next to retry.";
+    $("tCheck").style.display = "none";
+    $("tNext").style.display = "";
+    $("tNext").textContent = "Retry";
+    it.retry = true;
+  }
+}
+function renderTestRead(it) {
+  const area = $("tReadArea");
+  area.style.display = "";
+  const p = document.createElement("div");
+  p.className = "passage";
+  p.textContent = it.read.passage;
+  area.appendChild(p);
+  it.read.questions.slice(0, 2).forEach(q => {
+    const block = document.createElement("div");
+    block.className = "qblock";
+    block.innerHTML = '<div class="qtext">' + esc(q.q) + "</div>";
+    const opts = document.createElement("div");
+    opts.className = "opts";
+    const why = document.createElement("div");
+    why.className = "why";
+    why.textContent = q.why || "";
+    q.options.forEach((opt, oi) => {
+      const b = document.createElement("button");
+      b.textContent = opt;
+      b.addEventListener("click", () => {
+        if (opts.dataset.done) return;
+        opts.dataset.done = "1";
+        opts.querySelectorAll("button").forEach((x, xi) => {
+          x.disabled = true;
+          if (xi === q.answer) x.classList.add("correct");
+          else if (xi === oi) x.classList.add("incorrect");
+        });
+        why.classList.add("show");
+        it.readAnswered++;
+        if (oi === q.answer) it.readScore += 50;
+        if (it.readAnswered === 2) itemDone(it.readScore);
+      });
+      opts.appendChild(b);
+    });
+    block.appendChild(opts);
+    block.appendChild(why);
+    area.appendChild(block);
+  });
+}
+function renderVocabItem(it) {
+  const weak = weakCards(1)[0];
+  const others = S.deck.filter(c => c.id !== weak.id).sort(() => Math.random() - 0.5).slice(0, 3);
+  const options = [weak, ...others].sort(() => Math.random() - 0.5);
+  $("tPrompt").textContent = 'What does "' + weak.no + '" mean?';
+  $("tInput").style.display = "none";
+  $("tCheck").style.display = "none";
+  const box = $("tOpts");
+  box.innerHTML = "";
+  box.style.display = "";
+  options.forEach(c => {
+    const b = document.createElement("button");
+    b.textContent = c.en;
+    b.addEventListener("click", () => {
+      box.querySelectorAll("button").forEach(x => x.disabled = true);
+      const right = c.id === weak.id;
+      b.classList.add(right ? "correct" : "incorrect");
+      if (!right) box.querySelectorAll("button").forEach(x => { if (x.textContent === weak.en) x.classList.add("correct"); });
+      gradeCard(weak, right ? 4 : 0);
+      itemDone(right ? 100 : 0);
+    });
+    box.appendChild(b);
+  });
+}
+function itemDone(score) {
+  score = Math.max(0, Math.min(100, Math.round(score)));
+  T.scores.push(score);
+  const it = T.cur;
+  if (T.mode === "checkpoint" && it.goal) {
+    if (score >= 70) setGoal(it.goal.id, 2);
+    else if (score >= 40) setGoal(it.goal.id, 1);
+  }
+  if (T.mode === "placement") plRecord(score);
+  $("tCheck").style.display = "none";
+  $("tNext").style.display = "";
+  const more = T.mode === "checkpoint" ? (T.idx + 1 < T.items.length) : plHasMore();
+  $("tNext").textContent = more ? "Next" : "Finish";
+}
+$("tPlay").addEventListener("click", () => T.cur && T.cur.norwegian && speak(T.cur.norwegian, 1));
+$("tSlow").addEventListener("click", () => T.cur && T.cur.norwegian && speak(T.cur.norwegian, 0.72));
+$("tCheck").addEventListener("click", async () => {
+  const it = T.cur;
+  if (!it) return;
+  const ans = $("tInput").value.trim();
+  if (!ans) { toast("Answer first."); return; }
+  const btn = $("tCheck");
+  busy(btn, true, "Marking...");
+  try {
+    let j;
+    const lv = it.lv || (it.goal ? it.goal.lv : cefrLabel(S.level));
+    if (it.kind === "trans") {
+      j = await markTranslation(it.english, ans, "This is a test; mark strictly.");
+    } else if (it.kind === "listen") {
+      j = await markDictation(it.norwegian, ans);
+    } else if (it.kind === "write") {
+      j = await markWriting(it.task, ans, lv);
+    }
+    renderMarking($("tResult"), j);
+    logErrors(j);
+    itemDone(j.score || 0);
+  } catch (e) { toast(e.message); }
+  busy(btn, false);
+});
+$("tNext").addEventListener("click", () => {
+  if (T.cur && T.cur.retry) { T.cur.retry = false; renderTestItem(); return; }
+  T.idx++;
+  if (T.mode === "checkpoint") {
+    if (T.idx < T.items.length) { renderTestItem(); return; }
+    finishCheckpoint();
+  } else {
+    if (plHasMore()) { buildPlacementItem(); return; }
+    finishPlacement();
+  }
+});
+function finishCheckpoint() {
+  const avg = Math.round(T.scores.reduce((a, b) => a + b, 0) / T.scores.length);
+  const pass = avg >= 70;
+  resetTestUI();
+  $("tInput").style.display = "none";
+  $("tCheck").style.display = "none";
+  $("tPrompt").textContent = "";
+  const sum = $("tSummary");
+  sum.style.display = "";
+  $("tProg").textContent = "Scores: " + T.scores.join(", ") + " (average " + avg + ")";
+  if (pass) {
+    S.gate.pending = false;
+    save();
+    sum.innerHTML = "<b>Passed!</b> Level " + S.gate.level + " confirmed, and any goals you hit are now marked in the syllabus. Onward.";
+    addXP(20, false);
+    renderProgress();
+  } else {
+    sum.innerHTML = "<b>Not this time (needed 70).</b> Look at what tripped you up, drill it in Grammar or Vocab, and retake the test from the banner whenever you like.";
+  }
+}
+function finishPlacement() {
+  resetTestUI();
+  $("tInput").style.display = "none";
+  $("tCheck").style.display = "none";
+  $("tPrompt").textContent = "";
+  for (const sk of pl.skList) applyPlacement(sk, pl.levels[sk]);
+  S.profile.placedAt = Date.now();
+  save();
+  let html = "<b>Placement complete.</b><br>";
+  const pts = { A1: 0, A2: 1, B1: 2, B2: 3, C1: 4 };
+  let points = 0;
+  for (const sk of SKILLS) {
+    const lvl = pl.levels[sk];
+    html += SKILL_NAMES[sk] + ": <b>" + (lvl || "not tested (no French voice)") + "</b><br>";
+    points += pts[lvl] || 0;
+  }
+  const floor = points * 20;
+  const sum = $("tSummary");
+  sum.style.display = "";
+  sum.innerHTML = html;
+  $("tProg").textContent = "Scores: " + T.scores.join(", ");
+  if (floor > S.level) {
+    const b = document.createElement("button");
+    b.textContent = "Set my level to " + floor + " to match";
+    b.style.marginTop = "10px";
+    b.addEventListener("click", () => {
+      S.level = floor; S.xp = 0; save(); renderProgress();
+      toast("Level set to " + floor);
+      b.remove();
+    });
+    sum.appendChild(document.createElement("br"));
+    sum.appendChild(b);
+  }
+  renderStats();
+}
+$("tBack").addEventListener("click", () => showView("translate"));
+
+/* ============================================================
+   MERGE + SYNC (private GitHub Gist)
+   ============================================================ */
+function mergeState(d, withSettings) {
+  if (!d || typeof d !== "object") return;
+  const byNo = {};
+  for (const c of S.deck) byNo[c.no.trim().toLowerCase()] = c;
+  for (const c of (d.deck || [])) {
+    if (!c || !c.no || !c.en) continue;
+    const k = c.no.trim().toLowerCase();
+    const existing = byNo[k];
+    if (!existing || (c.due || 0) >= (existing.due || 0)) byNo[k] = c;
+  }
+  S.deck = Object.values(byNo);
+  for (const c of S.deck) { if (c.lapses == null) c.lapses = 0; }
+  if ((d.level || 1) > S.level || ((d.level || 1) === S.level && (d.xp || 0) > S.xp)) {
+    S.level = d.level || 1; S.xp = d.xp || 0;
+    if (d.gate) S.gate = d.gate;
+  }
+  if (d.stats) {
+    S.stats.exercises = Math.max(S.stats.exercises, d.stats.exercises || 0);
+    Object.assign(S.stats.days, d.stats.days || {});
+  }
+  if (d.grammarLog) {
+    for (const [k, v] of Object.entries(d.grammarLog)) {
+      S.grammarLog[k] = Math.max(S.grammarLog[k] || 0, v);
+    }
+  }
+  if (d.goals) {
+    for (const [k, v] of Object.entries(d.goals)) {
+      if ((S.goals[k] || 0) < v) S.goals[k] = v;
+    }
+  }
+  if (d.profile && d.profile.placedAt && (!S.profile.placedAt || d.profile.placedAt > S.profile.placedAt)) {
+    S.profile = Object.assign({}, S.profile, d.profile);
+  }
+  if (withSettings && d.settings) {
+    S.settings.topics = d.settings.topics || S.settings.topics;
+    S.settings.difficulty = d.settings.difficulty || S.settings.difficulty;
+    S.settings.cardStyle = d.settings.cardStyle || S.settings.cardStyle;
+  }
+  save();
+}
+const GH_TOKEN_KEY = "francofile_ghtoken";
+const GIST_ID_KEY = "francofile_gistid";
+const GIST_DESC = "Francofile sync data (do not edit)";
+function ghToken() { return localStorage.getItem(GH_TOKEN_KEY) || ""; }
+async function ghApi(path, method, body) {
+  let res;
+  try {
+    res = await fetch("https://api.github.com" + path, {
+      method: method || "GET",
+      headers: { "Authorization": "Bearer " + ghToken(), "Accept": "application/vnd.github+json" },
+      body: body ? JSON.stringify(body) : undefined
+    });
+  } catch (e) { throw new Error("network problem"); }
+  if (!res.ok) throw new Error(res.status === 401 ? "token rejected" : "GitHub error " + res.status);
+  return res.json();
+}
+async function findOrCreateGist() {
+  let id = localStorage.getItem(GIST_ID_KEY);
+  if (id) return id;
+  const gists = await ghApi("/gists?per_page=100");
+  const hit = gists.find(g => g.description === GIST_DESC);
+  if (hit) { localStorage.setItem(GIST_ID_KEY, hit.id); return hit.id; }
+  const created = await ghApi("/gists", "POST", {
+    description: GIST_DESC, public: false,
+    files: { "francofile.json": { content: JSON.stringify(S) } }
+  });
+  localStorage.setItem(GIST_ID_KEY, created.id);
+  return created.id;
+}
+let syncBusyFlag = false;
+async function syncNow(manual) {
+  if (!ghToken()) { if (manual) toast("Paste a GitHub token and tap Connect first."); return; }
+  if (syncBusyFlag) return;
+  syncBusyFlag = true;
+  const st = $("syncStatus");
+  st.textContent = "Syncing...";
+  try {
+    const id = await findOrCreateGist();
+    const gist = await ghApi("/gists/" + id);
+    const file = gist.files && gist.files["francofile.json"];
+    if (file) {
+      let content = file.content;
+      if (file.truncated && file.raw_url) {
+        const r = await fetch(file.raw_url);
+        content = await r.text();
+      }
+      try { mergeState(JSON.parse(content), false); } catch (e) {}
+    }
+    await ghApi("/gists/" + id, "PATCH", { files: { "francofile.json": { content: JSON.stringify(S) } } });
+    syncDirty = false;
+    st.textContent = "Synced at " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    renderProgress(); renderVocabStats(); renderStats();
+    if (manual) toast("Synced");
+  } catch (e) {
+    st.textContent = "Sync failed: " + e.message + ". Your local progress is safe.";
+    if (manual) toast("Sync failed: " + e.message);
+  }
+  syncBusyFlag = false;
+}
+$("syncConnect").addEventListener("click", async () => {
+  const tok = $("sGhToken").value.trim();
+  if (!tok) { toast("Paste a GitHub token first."); return; }
+  localStorage.setItem(GH_TOKEN_KEY, tok);
+  localStorage.removeItem(GIST_ID_KEY);
+  const btn = $("syncConnect");
+  busy(btn, true, "Connecting...");
+  await syncNow(true);
+  busy(btn, false);
+});
+$("syncNowBtn").addEventListener("click", () => syncNow(true));
+setInterval(() => { if (syncDirty && ghToken()) syncNow(false); }, 60000);
+
+/* ============================================================
+   SETTINGS
+   ============================================================ */
+function renderStats() {
+  $("stCards").textContent = S.deck.length;
+  $("stEx").textContent = S.stats.exercises;
+  $("stDays").textContent = Object.keys(S.stats.days).length;
+  const pr = $("profileRows");
+  pr.innerHTML = "";
+  for (const sk of SKILLS) {
+    const cov = coverage(TARGET_LV, sk);
+    const lvl = S.profile[sk];
+    const row = document.createElement("div");
+    row.className = "profrow";
+    row.innerHTML = "<span>" + SKILL_NAMES[sk] + "</span>" +
+      '<span class="p-cov">' + TARGET_LV + " goals " + cov.done + "/" + cov.total + "</span>" +
+      '<span class="p-lvl">' + (lvl || "not placed") + "</span>";
+    pr.appendChild(row);
+  }
+  const tot = coverage(TARGET_LV);
+  const totRow = document.createElement("div");
+  totRow.className = "profrow";
+  totRow.innerHTML = "<span><b>" + TARGET_LV + " goals demonstrated</b></span><span></span><span class=\"p-lvl\">" + tot.done + " of " + tot.total + "</span>";
+  pr.appendChild(totRow);
+  if (!S.profile.placedAt) {
+    const hint = document.createElement("p");
+    hint.className = "hint";
+    hint.textContent = "Take the placement test below to find your verified starting point per skill.";
+    pr.appendChild(hint);
+  }
+  renderSyllabusList();
+}
+function renderSyllabusList() {
+  const wrap = $("sylList");
+  wrap.innerHTML = "";
+  for (const lv of LV_ORDER) {
+    for (const sk of SKILLS) {
+      const goals = goalsFor(lv, sk);
+      if (!goals.length) continue;
+      const cov = coverage(lv, sk);
+      const det = document.createElement("details");
+      det.className = "syl";
+      const sum = document.createElement("summary");
+      sum.textContent = lv + " " + SKILL_NAMES[sk].toLowerCase() + " (" + cov.done + "/" + cov.total + ")";
+      det.appendChild(sum);
+      for (const g of goals) {
+        const st = goalState(g.id);
+        const row = document.createElement("div");
+        row.className = "goalrow" + (st === 2 ? " done" : st === 1 ? " part" : "");
+        row.innerHTML = '<span class="gmark">' + (st === 2 ? "&#10003;" : st === 1 ? "&#9679;" : "&#9675;") + "</span><span>" + esc(g.t) + "</span>";
+        det.appendChild(row);
+      }
+      wrap.appendChild(det);
+    }
+  }
+}
+$("plStart").addEventListener("click", () => {
+  if (S.profile.placedAt && !confirm("You have already taken the placement test. Retake it? (It can only raise your verified goals, never lower them.)")) return;
+  showView("test");
+  startPlacement();
+});
+function loadSettingsUI() {
+  $("sKey").value = apiKey();
+  $("sDiff").value = S.settings.difficulty;
+  $("sCardStyle").value = S.settings.cardStyle;
+  $("sTopics").value = S.settings.topics;
+  $("sGhToken").value = ghToken();
+  if (ghToken()) $("syncStatus").textContent = "Connected. Syncs automatically.";
+  pickVoices();
+}
+$("sSave").addEventListener("click", () => {
+  const k = $("sKey").value.trim();
+  if (k) localStorage.setItem(KEY_KEY, k);
+  S.settings.difficulty = $("sDiff").value;
+  S.settings.cardStyle = $("sCardStyle").value;
+  S.settings.topics = $("sTopics").value.trim() || DEFAULT_TOPICS;
+  S.settings.voiceURI = $("sVoice").value;
+  const voices = canSpeak() ? speechSynthesis.getVoices() : [];
+  noVoice = voices.find(v => v.voiceURI === S.settings.voiceURI) || noVoice;
+  save();
+  toast("Settings saved");
+});
+$("sExport").addEventListener("click", () => {
+  const data = JSON.stringify(S, null, 1);
+  const blob = new Blob([data], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "francofile-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  toast("Backup downloaded");
+});
+$("sImport").addEventListener("click", () => $("sImportFile").click());
+$("sImportFile").addEventListener("change", e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const d = JSON.parse(r.result);
+      if (!d || !Array.isArray(d.deck)) throw new Error("That does not look like a Francofile backup.");
+      mergeState(d, true);
+      renderProgress(); renderStats(); renderVocabStats(); loadSettingsUI();
+      toast("Backup imported and merged");
+    } catch (err) { toast("Import failed: " + err.message); }
+  };
+  r.readAsText(f);
+  e.target.value = "";
+});
+$("sReset").addEventListener("click", () => {
+  if (!confirm("Erase ALL Francofile data on this device? Export a backup first if in doubt.")) return;
+  if (!confirm("Really erase everything, including your deck and level?")) return;
+  localStorage.removeItem(STORE_KEY);
+  localStorage.removeItem(KEY_KEY);
+  localStorage.removeItem(GH_TOKEN_KEY);
+  localStorage.removeItem(GIST_ID_KEY);
+  location.reload();
+});
+
+/* ---------- init ---------- */
+load();
+renderProgress();
+renderVocabStats();
+loadSettingsUI();
+if (ghToken()) syncNow(false);
+if (!apiKey()) {
+  setTimeout(() => {
+    toast("Bienvenue! Tap the gear icon and add your Anthropic API key to get started.", 5000);
+  }, 600);
+}
+</script>
+</body>
+</html>
