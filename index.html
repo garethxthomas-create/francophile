@@ -512,6 +512,8 @@ function load() {
       if (!Array.isArray(S.deck)) S.deck = [];
       if (!Array.isArray(S.recentEn)) S.recentEn = [];
       if (!Array.isArray(S.recentThemes)) S.recentThemes = [];
+      // clean out junk cards (e.g. bare numbers) from earlier versions
+      S.deck = S.deck.filter(c => c && c.no && c.en && /\p{L}/u.test(c.no) && /\p{L}/u.test(c.en));
       for (const c of S.deck) { if (c.lapses == null) c.lapses = 0; }
     }
   } catch (e) { console.error("load failed", e); }
@@ -850,7 +852,7 @@ async function markTranslation(english, french, extraNote) {
     '"errors": [{"issue": "3-6 word label", "explanation": "clear English explanation of the rule and why", "tag": "one of: ' + TAG_LIST + '"}], ' +
     '"native": "what a native speaker would most naturally say", ' +
     '"comment": "one short honest sentence of feedback, not gushing", ' +
-    '"vocab": [{"no": "french item", "en": "english"}]} ' +
+    '"vocab": [{"french": "french item", "en": "english"}]} ' +
     "vocab holds up to 3 items the learner got wrong or was missing, worth drilling (" + vocabSpec() + "); [] if none. " +
     "If the answer is fully correct and natural, errors is [] and score is 95-100. " +
     "If the learner is B2 or above, also flag unnatural register or unidiomatic phrasing, not just grammar. Explanations teach; never just restate the fix.";
@@ -891,10 +893,14 @@ function newCard(no, en) {
 function addCards(pairs) {
   let added = 0;
   for (const p of pairs || []) {
-    if (!p || !p.no || !p.en) continue;
-    const key = p.no.trim().toLowerCase();
-    if (!key || S.deck.some(c => c.no.trim().toLowerCase() === key)) continue;
-    S.deck.push(newCard(p.no, p.en));
+    if (!p) continue;
+    const noSide = String(p.no || p.french || p.fr || p.text || "").trim();
+    const enSide = String(p.en || p.english || "").trim();
+    if (!noSide || !enSide) continue;
+    if (!/\p{L}/u.test(noSide) || !/\p{L}/u.test(enSide)) continue; // must contain real letters
+    const key = noSide.toLowerCase();
+    if (S.deck.some(c => c.no.trim().toLowerCase() === key)) continue;
+    S.deck.push(newCard(noSide, enSide));
     added++;
   }
   if (added) { save(); renderVocabStats(); }
@@ -1075,7 +1081,16 @@ let mCards = [], mSel = null, mWrong = {}, mDone = 0;
 function newMatchRound() {
   const due = dueCards();
   const pool = due.length >= 5 ? due : [...S.deck].sort(() => Math.random() - 0.5);
-  mCards = pool.slice(0, 5);
+  // never allow two cards with the same English side in one round
+  const seenEn = new Set();
+  const uniq = [];
+  for (const c of pool) {
+    const k = c.en.trim().toLowerCase();
+    if (seenEn.has(k)) continue;
+    seenEn.add(k);
+    uniq.push(c);
+  }
+  mCards = uniq.slice(0, 5);
   mSel = null; mWrong = {}; mDone = 0;
   const grid = $("mGrid");
   grid.innerHTML = "";
@@ -1175,7 +1190,7 @@ $("weakPhrase").addEventListener("click", async () => {
     const words = weak.map(c => c.no + " (" + c.en + ")").join(", ");
     const sys = "You build contextual flashcards for a French learner. " + promptContext() +
       " For each given word, write one short natural French phrase of 3 to 6 words that uses the word in a typical context, with its English meaning." +
-      ' Respond with only JSON: {"cards":[{"no":"phrase","en":"english"}]}';
+      ' Respond with only JSON: {"cards":[{"french":"phrase","en":"english"}]}';
     const j = await callJSON(sys, [{ role: "user", content: "Words: " + words }], 900);
     const n = addCards(j.cards);
     toast(n ? n + " phrase cards added" : "No new cards (duplicates skipped)");
@@ -1193,7 +1208,7 @@ $("seedBtn").addEventListener("click", async () => {
     const basics = cefrLabel(S.level) === "A1" ? "" : " No absolute beginner words (not bonjour, merci, oui).";
     const sys = "You build a starter flashcard deck for a French learner. " + promptContext() +
       " Create exactly 30 cards: about 20 high-frequency items slightly above the learner's comfort zone, and about 10 drawn from the learner's topics." + basics + phraseBit +
-      ' Respond with only JSON: {"cards":[{"no":"french","en":"english"}]}';
+      ' Respond with only JSON: {"cards":[{"french":"...","en":"english"}]}';
     const j = await callJSON(sys, [{ role: "user", content: "Build my starter deck." }], 2500);
     const n = addCards(j.cards);
     toast(n + " cards added");
@@ -1409,15 +1424,17 @@ async function lookupWord(token, span) {
     const context = rdCurrent.passage.slice(Math.max(0, idx - 120), idx + 140);
     const sys = "You are a French-English dictionary that understands context. " +
       "Given a French word and the sentence it appears in, explain it. Use US spelling. Never use em dashes. " +
-      ' Respond with only JSON: {"no":"the dictionary (base) form","en":"meaning in this exact context","note":"very short grammar note, e.g. feminine noun; passé composé of prendre; subjunctive"}';
+      ' Respond with only JSON: {"french":"the dictionary (base) form","en":"meaning in this exact context","note":"very short grammar note, e.g. feminine noun; passé composé of prendre; subjunctive"}';
     const j = await callJSON(sys, [{ role: "user", content: "Word: " + word + "\nContext: ..." + context + "..." }], 300);
-    box.innerHTML = "<b>" + esc(j.no || word) + "</b> = " + esc(j.en || "?") +
+    const base = j.french || j.no || word;
+    const meaning = j.en || j.english || "";
+    box.innerHTML = "<b>" + esc(base) + "</b> = " + esc(meaning || "?") +
       (j.note ? '<br><span style="font-size:.82rem">' + esc(j.note) + "</span>" : "");
     const add = document.createElement("button");
     add.className = "addbtn";
     add.textContent = "Add to deck";
     add.addEventListener("click", () => {
-      const n = addCards([{ no: j.no || word, en: j.en || "" }]);
+      const n = addCards([{ no: base, en: meaning }]);
       toast(n ? "Added to deck" : "Already in your deck");
     });
     box.appendChild(document.createElement("br"));
@@ -1457,17 +1474,30 @@ function pickVoices() {
 }
 if (window.speechSynthesis) speechSynthesis.onvoiceschanged = pickVoices;
 
+let warnedVoice = false;
+function ensureVoice() {
+  if (noVoice) return;
+  const voices = speechSynthesis.getVoices();
+  noVoice = voices.find(v => /^fr[-_]FR/i.test(v.lang)) || voices.find(v => /^fr/i.test(v.lang)) || null;
+  if (!noVoice && !warnedVoice) {
+    warnedVoice = true;
+    toast("No French voice found on this device; trying the default voice. Install a French voice in your system settings for reliable audio.", 5500);
+  }
+}
 function speak(text, rate) {
   if (!canSpeak()) { toast("This browser has no speech synthesis."); return; }
+  ensureVoice();
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = "fr-FR";
   if (noVoice) u.voice = noVoice;
   u.rate = rate || 1;
   speechSynthesis.speak(u);
+  speechSynthesis.resume(); // Chrome sometimes starts paused and stays silent without this
 }
 function speakLong(text, rate) {
   if (!canSpeak()) { toast("This browser has no speech synthesis."); return; }
+  ensureVoice();
   speechSynthesis.cancel();
   const parts = text.match(/[^.!?]+[.!?]*/g) || [text];
   for (const part of parts) {
@@ -1479,6 +1509,7 @@ function speakLong(text, rate) {
     u.rate = rate || 1;
     speechSynthesis.speak(u);
   }
+  speechSynthesis.resume();
 }
 function lvListenSpec(lv) {
   if (lv === "A1") return "One very simple sentence of 5 to 7 common words.";
@@ -1496,10 +1527,11 @@ async function liNewSentence() {
     noteTheme(theme);
     const sys = "You write French for a listening dictation exercise. " + promptContext() +
       " Theme: " + theme + ". " + lvListenSpec(cefrLabel(S.level)) + " Natural spoken French, specific rather than generic." +
-      ' Respond with only JSON: {"norwegian":"the french text","english":"english meaning"}';
+      ' Respond with only JSON: {"french":"the french text","english":"english meaning"}';
     const j = await callJSON(sys, [{ role: "user", content: "One new dictation item." }], 500);
-    if (!j.norwegian) throw new Error("No sentence returned. Try again.");
-    liCurrent = j;
+    const frText = j.french || j.norwegian || j.text;
+    if (!frText) throw new Error("No sentence returned. Try again.");
+    liCurrent = { norwegian: frText, english: j.english || "" };
     $("liInput").value = "";
     $("liResult").classList.remove("show");
     $("liPlay").disabled = false;
@@ -1521,7 +1553,7 @@ async function liCheckAnswer() {
       ' Respond with only JSON: {"score":0-100,' +
       '"errors":[{"issue":"3-6 word label","explanation":"what was missed or misheard and why it matters, in English","tag":"one of: ' + TAG_LIST + '"}],' +
       '"comment":"one short honest sentence",' +
-      '"vocab":[{"no":"...","en":"..."}]} ' +
+      '"vocab":[{"french":"...","en":"..."}]} ' +
       "vocab holds up to 3 missed items worth drilling (" + vocabSpec() + "); [] if none.";
     const j = await callJSON(sys, [{ role: "user", content: "Actual text: " + liCurrent.norwegian + "\nLearner typed: " + ans }], 1000);
     renderMarking($("liResult"), j);
@@ -1658,8 +1690,9 @@ async function genListenItem(lv, goalText) {
   const sys = "You write French for a listening dictation test item at CEFR level " + lv + ". " + promptContext() +
     " " + lvListenSpec(lv) +
     (goalText ? " The item should exercise this curriculum goal: " + goalText + "." : "") +
-    ' Respond with only JSON: {"norwegian":"the french text"}';
-  return callJSON(sys, [{ role: "user", content: "One dictation item." }], 400);
+    ' Respond with only JSON: {"french":"the french text"}';
+  const j = await callJSON(sys, [{ role: "user", content: "One dictation item." }], 400);
+  return { norwegian: j.french || j.norwegian || j.text || "" };
 }
 async function genReadItem(lv, goalText) {
   const sys = "You write a French reading test item at CEFR level " + lv + ". " + promptContext() +
