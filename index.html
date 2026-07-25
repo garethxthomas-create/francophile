@@ -180,7 +180,7 @@ nav{
   display:flex; padding-bottom:env(safe-area-inset-bottom);
 }
 nav button{
-  flex:1; background:none; color:var(--muted); font-size:.66rem; font-weight:600;
+  flex:1; background:none; color:var(--muted); font-size:.62rem; font-weight:600;
   padding:8px 1px 10px; border-radius:0; display:flex; flex-direction:column; align-items:center; gap:2px;
 }
 nav button svg{width:21px; height:21px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
@@ -212,6 +212,21 @@ details.syl summary{cursor:pointer; font-weight:600; font-size:.9rem; padding:10
 .goalrow.done{color:var(--ink);}
 .goalrow.done .gmark{color:var(--good);}
 .goalrow.part .gmark{color:var(--warn);}
+/* today plan */
+.planrow{display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);}
+.planrow:last-child{border-bottom:none;}
+.planrow .p-mark{
+  width:24px; height:24px; border-radius:50%; border:2px solid var(--border); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:700; color:var(--muted);
+}
+.planrow.done .p-mark{background:var(--good); border-color:var(--good); color:#fff;}
+.planrow .p-label{flex:1; font-size:.93rem;}
+.planrow .p-label .p-sub{display:block; font-size:.75rem; color:var(--muted);}
+.planrow.done .p-label{color:var(--muted); text-decoration:line-through;}
+.planrow .p-go{padding:6px 14px; font-size:.82rem; background:var(--accent-soft); color:var(--accent);}
+.planrow.done .p-go{display:none;}
+#planDone{display:none;}
+#planDone.show{display:block;}
 </style>
 </head>
 <body>
@@ -232,8 +247,20 @@ details.syl summary{cursor:pointer; font-weight:600; font-size:.9rem; padding:10
 
 <main>
 
+<!-- TODAY -->
+<section class="view active" id="view-today">
+  <div class="card">
+    <h2>Today's plan</h2>
+    <div class="lesson" id="focusNote" style="display:none"></div>
+    <div id="planList"></div>
+    <div class="nativebox" id="planDone"><b>Plan complete!</b> Bonus XP earned. Anything more today is a victory lap.</div>
+    <div class="btnrow"><button class="subtle" id="planNew">Rebuild today's plan</button></div>
+    <p class="hint">Built fresh each day from your due cards, weakest skill, most frequent errors, and your next unverified syllabus goals. It adapts: short after a busy streak, bigger after a gap.</p>
+  </div>
+</section>
+
 <!-- TRANSLATE -->
-<section class="view active" id="view-translate">
+<section class="view" id="view-translate">
   <div class="card">
     <h2>Translate to French</h2>
     <div class="sentence" id="trEn">Tap "New sentence" to begin.</div>
@@ -410,8 +437,11 @@ details.syl summary{cursor:pointer; font-weight:600; font-size:.9rem; padding:10
     <label for="sTopics">Your personal topics</label>
     <textarea id="sTopics"></textarea>
     <p class="hint">These are mixed automatically with core learner themes like numbers, dates and times, directions, feelings, and making plans, so your practice covers the essentials too.</p>
-    <label for="sVoice">French voice</label>
+    <label for="sVoice">French voice (device)</label>
     <select id="sVoice"></select>
+    <label for="sGTts">Google Cloud TTS key (optional premium voice)</label>
+    <input type="password" id="sGTts" placeholder="AIza..." autocomplete="off">
+    <p class="hint">With a key, all audio uses Google's natural French WaveNet voice on every device, with the device voice as fallback. Google's free tier (1M characters/month) makes this effectively free.</p>
     <div class="btnrow"><button id="sSave">Save settings</button></div>
   </div>
   <div class="card">
@@ -455,7 +485,8 @@ details.syl summary{cursor:pointer; font-weight:600; font-size:.9rem; padding:10
 </main>
 
 <nav>
-  <button data-view="translate" class="on"><svg viewBox="0 0 24 24"><path d="M4 5h9M8.5 5v2.5c0 3-2 5.5-4.5 6.5M5.5 9c1 2.7 3.5 5 6.5 5.5M13 19l4-9 4 9M14.2 16.5h5.6"/></svg>Translate</button>
+  <button data-view="today" class="on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 11.9v.2"/></svg>Today</button>
+  <button data-view="translate"><svg viewBox="0 0 24 24"><path d="M4 5h9M8.5 5v2.5c0 3-2 5.5-4.5 6.5M5.5 9c1 2.7 3.5 5 6.5 5.5M13 19l4-9 4 9M14.2 16.5h5.6"/></svg>Translate</button>
   <button data-view="vocab"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="13" height="15" rx="2"/><path d="M8 3h11a2 2 0 0 1 2 2v13M7 10h5M7 14h5"/></svg>Vocab</button>
   <button data-view="grammar"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.6H20l-4.9 3.6 1.9 5.8-5-3.6-5 3.6 1.9-5.8L4 8.6h6.1z"/></svg>Grammar</button>
   <button data-view="read"><svg viewBox="0 0 24 24"><path d="M12 6c-1.5-1.3-3.5-2-6-2H4v14h2c2.5 0 4.5.7 6 2 1.5-1.3 3.5-2 6-2h2V4h-2c-2.5 0-4.5.7-6 2zM12 6v14"/></svg>Read</button>
@@ -494,7 +525,9 @@ let S = {
   grammarLog: {},
   gate: { pending: false, level: 0 },
   goals: {},
-  profile: { listen: "", read: "", write: "", placedAt: null }
+  profile: { listen: "", read: "", write: "", placedAt: null },
+  today: null,
+  focusNote: null
 };
 
 function load() {
@@ -509,6 +542,8 @@ function load() {
       S.gate = d.gate || { pending: false, level: 0 };
       S.goals = d.goals || {};
       S.profile = Object.assign({ listen: "", read: "", write: "", placedAt: null }, d.profile || {});
+      S.today = d.today || null;
+      S.focusNote = d.focusNote || null;
       if (!Array.isArray(S.deck)) S.deck = [];
       if (!Array.isArray(S.recentEn)) S.recentEn = [];
       if (!Array.isArray(S.recentThemes)) S.recentThemes = [];
@@ -525,7 +560,7 @@ function save() {
 }
 function apiKey() { return localStorage.getItem(KEY_KEY) || ""; }
 function markDay() {
-  const d = new Date().toISOString().slice(0, 10);
+  const d = todayKey();
   if (!S.stats.days[d]) { S.stats.days[d] = 1; }
 }
 
@@ -562,11 +597,10 @@ function addXP(n, countExercise) {
 }
 function streakCount() {
   const day = 86400000;
-  const key = d => d.toISOString().slice(0, 10);
   let cur = new Date();
-  if (!S.stats.days[key(cur)]) cur = new Date(cur.getTime() - day); // nothing yet today: count the run ending yesterday
+  if (!S.stats.days[localDateKey(cur)]) cur = new Date(cur.getTime() - day); // nothing yet today: count the run ending yesterday
   let n = 0;
-  while (S.stats.days[key(cur)]) { n++; cur = new Date(cur.getTime() - day); }
+  while (S.stats.days[localDateKey(cur)]) { n++; cur = new Date(cur.getTime() - day); }
   return n;
 }
 function renderProgress() {
@@ -645,10 +679,21 @@ async function callJSON(system, messages, maxTokens) {
   return extractJSON(text);
 }
 function promptContext() {
-  return "Learner: a native English speaker learning French, level " + S.level + " of " + TOTAL_LEVELS + " (CEFR " + cefrLabel(S.level) +
+  const band = cefrLabel(S.level);
+  const pitch = band === "A1"
+    ? " IMPORTANT: the learner is a true beginner (A1). Use only very high-frequency vocabulary, very short simple sentences, mostly present tense. Models always overestimate beginners; when in doubt, make it easier."
+    : band === "A2"
+    ? " Keep the language elementary (A2): short sentences, everyday vocabulary, present and simple past tenses."
+    : "";
+  return "Learner: a native English speaker learning French, level " + S.level + " of " + TOTAL_LEVELS + " (CEFR " + band +
     "). Difficulty preference: " + S.settings.difficulty +
     ". Topics to draw from naturally: " + S.settings.topics +
-    ". Always natural, modern French as spoken in France. English text uses US spelling. Never use em dashes anywhere.";
+    ". Always natural, modern French as spoken in France. English text uses US spelling. Never use em dashes anywhere." +
+    " CRITICAL: assume the learner has NO formal grammar training. Never use a bare grammar term. If a term is unavoidable, define it instantly in everyday words with a tiny example, like: subjonctif (the special form after certain phrases, as in il faut que tu fasses). Prefer plain descriptions over terminology." + pitch;
+}
+function knownWords(n) {
+  if (!S.deck.length) return "";
+  return [...S.deck].sort(() => Math.random() - 0.5).slice(0, n || 18).map(c => c.no).join(", ");
 }
 function vocabSpec() {
   return S.settings.cardStyle === "phrases"
@@ -849,13 +894,13 @@ async function markTranslation(english, french, extraNote) {
     (extraNote ? " " + extraNote : "") +
     ' Mark the learner\'s French against the English. Respond with only JSON: ' +
     '{"score": 0-100, "corrected": "the learner\'s answer with minimal fixes applied", ' +
-    '"errors": [{"issue": "3-6 word label", "explanation": "clear English explanation of the rule and why", "tag": "one of: ' + TAG_LIST + '"}], ' +
+    '"errors": [{"issue": "3-6 word plain-English label", "explanation": "plain everyday English for someone with no grammar training; define any term you use, with a tiny French example", "tag": "one of: ' + TAG_LIST + '"}], ' +
     '"native": "what a native speaker would most naturally say", ' +
     '"comment": "one short honest sentence of feedback, not gushing", ' +
-    '"vocab": [{"french": "french item", "en": "english"}]} ' +
+    '"vocab": [{"french": "french item", "en": "plain English meaning, never a grammar label"}]} ' +
     "vocab holds up to 3 items the learner got wrong or was missing, worth drilling (" + vocabSpec() + "); [] if none. " +
     "If the answer is fully correct and natural, errors is [] and score is 95-100. " +
-    "If the learner is B2 or above, also flag unnatural register or unidiomatic phrasing, not just grammar. Explanations teach; never just restate the fix.";
+    "If the learner is B2 or above, also flag unnatural register or unidiomatic phrasing, not just grammar. Explanations teach; never just restate the fix, and never assume the learner knows what terms like subjunctive or past participle mean.";
   return callJSON(sys, [{ role: "user", content: "English: " + english + "\nLearner's French: " + french }], 1200);
 }
 function logErrors(j) {
@@ -879,6 +924,39 @@ function renderMarking(el, j) {
   if (j.native) html += '<div class="nativebox"><b>A native would say:</b> ' + esc(j.native) + "</div>";
   el.innerHTML = html;
   el.classList.add("show");
+  if ((j.errors || []).length) {
+    const btn = document.createElement("button");
+    btn.className = "subtle";
+    btn.style.marginTop = "6px";
+    btn.textContent = "Explain more simply";
+    btn.addEventListener("click", () => simplifyExplanation(el, j, btn));
+    el.appendChild(btn);
+  }
+}
+async function simplifyExplanation(el, j, btn) {
+  busy(btn, true, "Rewriting...");
+  try {
+    const sys = "You explain French corrections to a smart adult with absolutely no grammar training. " +
+      "Rewrite the following error explanations in the simplest everyday English, one or two short sentences each, each with a tiny French example. " +
+      "Zero grammar terminology; describe what happens instead (say 'the past form of the word' not 'passé composé'; say 'the little word that goes with it' not 'preposition'). Use US spelling. Never use em dashes." +
+      ' Respond with only JSON: {"text":"the rewritten explanation as plain text"}';
+    const payload = {
+      errors: (j.errors || []).map(e => ({ issue: e.issue, explanation: e.explanation })),
+      corrected: j.corrected || "",
+      native: j.native || ""
+    };
+    const r = await callJSON(sys, [{ role: "user", content: JSON.stringify(payload) }], 700);
+    if (r.text) {
+      const box = document.createElement("div");
+      box.className = "lesson";
+      box.style.marginTop = "8px";
+      box.textContent = r.text;
+      el.appendChild(box);
+      btn.remove();
+      return;
+    }
+  } catch (e) { toast(e.message); }
+  busy(btn, false);
 }
 function absorbVocab(j) {
   const gained = addCards(j.vocab);
@@ -937,6 +1015,7 @@ function showView(name) {
   $("gearBtn").classList.toggle("on", name === "settings");
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   $("view-" + name).classList.add("active");
+  if (name === "today") renderToday();
   if (name === "vocab") { renderVocabStats(); refreshFlashQueue(); }
   if (name === "grammar") renderGrammarPicker();
   if (name === "settings") renderStats();
@@ -946,6 +1025,156 @@ document.querySelectorAll("nav button").forEach(b => {
 });
 $("gearBtn").addEventListener("click", () => showView("settings"));
 $("gateBtn").addEventListener("click", () => { showView("test"); startTest(); });
+
+/* ============================================================
+   TODAY: adaptive daily plan
+   ============================================================ */
+function localDateKey(d) {
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function todayKey() { return localDateKey(new Date()); }
+function daysSinceLastPractice() {
+  const days = Object.keys(S.stats.days).filter(d => d < todayKey()).sort();
+  if (!days.length) return 99;
+  const last = new Date(days[days.length - 1] + "T12:00:00");
+  return Math.max(0, Math.round((Date.now() - last.getTime()) / 86400000));
+}
+function skillRank() {
+  const score = sk => (LV_ORDER.indexOf(S.profile[sk]) + 1) * 100 + coverage(TARGET_LV, sk).done;
+  return [...SKILLS].sort((a, b) => score(a) - score(b));
+}
+function planSkillStep(sk, gap) {
+  const g = nextTargetGoal(sk);
+  if (sk === "listen") return { kind: "listen", need: gap >= 2 ? 2 : 1, got: 0, done: false, mode: "listen",
+    label: "Listening dictation", goal: g && g.t, sub: g && ("Goal: " + g.t) };
+  if (sk === "read") return { kind: "read", need: 1, got: 0, done: false, mode: "read",
+    label: "Read a text and answer its questions", goal: g && g.t, sub: g && ("Goal: " + g.t) };
+  return { kind: "translate", need: gap >= 2 ? 3 : 2, got: 0, done: false, mode: "translate",
+    label: "Translations into French", goal: g && g.t, sub: g && ("Goal: " + g.t) };
+}
+function buildPlan() {
+  const gap = daysSinceLastPractice();
+  const due = dueCards().length;
+  const steps = [];
+  if (S.gate.pending) {
+    if (due) {
+      const n = Math.min(due, 10);
+      steps.push({ kind: "card", need: n, got: 0, done: false, mode: "vocab", label: "Warm up: review " + n + " due cards" });
+    }
+    steps.push({ kind: "checkpoint", need: 1, got: 0, done: false, mode: "test", label: "Take the level " + S.gate.level + " checkpoint test", sub: "Passing verifies syllabus goals and unlocks leveling" });
+  } else {
+    if (due) {
+      const n = Math.min(due, gap >= 2 ? 20 : 12);
+      steps.push({ kind: "card", need: n, got: 0, done: false, mode: "vocab", label: "Review " + n + " due cards", sub: due > n ? (due + " due in total; the rest can wait") : null });
+    }
+    const ranked = skillRank();
+    steps.push(planSkillStep(ranked[0], gap));
+    const tags = Object.entries(S.grammarLog).sort((a, b) => b[1] - a[1]);
+    const dayNum = Math.floor(Date.now() / 86400000);
+    if (tags.length && dayNum % 2 === 0) {
+      steps.push({ kind: "grammar", need: 3, got: 0, done: false, mode: "grammar", tag: tags[0][0],
+        label: "Grammar drill: " + tags[0][0], sub: "Your most frequent recent error (" + tags[0][1] + "x)" });
+    } else {
+      steps.push(planSkillStep(ranked[1], 0));
+    }
+    if (dayNum % 3 === 0) {
+      steps.push({ kind: "chat", need: 4, got: 0, done: false, mode: "chat", label: "Chat with Chloé: at least 4 replies in French" });
+    }
+    if (gap >= 2 || due > 25) {
+      const extra = planSkillStep(ranked[2], 0);
+      if (!steps.some(s => s.mode === extra.mode)) steps.push(extra);
+    }
+  }
+  const seen = new Set();
+  S.today = { date: todayKey(), bonus: false, steps: steps.filter(s => { if (seen.has(s.mode)) return false; seen.add(s.mode); return true; }) };
+  save();
+}
+function planGoal(mode) {
+  if (!S.today || S.today.date !== todayKey()) return null;
+  const st = S.today.steps.find(s => s.mode === mode && !s.done && s.goal);
+  return st ? st.goal : null;
+}
+function planNote(kind) {
+  if (!S.today || S.today.date !== todayKey()) return;
+  const st = S.today.steps.find(s => s.kind === kind && !s.done);
+  if (!st) return;
+  st.got++;
+  if (st.got >= st.need) st.done = true;
+  save();
+  if (S.today.steps.every(s => s.done) && !S.today.bonus) {
+    S.today.bonus = true;
+    save();
+    addXP(10, false);
+    toast("Today's plan complete! +10 XP bonus", 4000);
+  }
+  if ($("view-today").classList.contains("active")) renderPlanList();
+}
+function goStep(st) {
+  if (st.mode === "test") { showView("test"); startTest(); return; }
+  showView(st.mode);
+  if (st.mode === "vocab") switchVocabTab("flash");
+  if (st.mode === "grammar" && st.tag) startDrill(st.tag, null);
+}
+function renderPlanList() {
+  const list = $("planList");
+  list.innerHTML = "";
+  S.today.steps.forEach((st, i) => {
+    const row = document.createElement("div");
+    row.className = "planrow" + (st.done ? " done" : "");
+    const mark = document.createElement("div");
+    mark.className = "p-mark";
+    mark.innerHTML = st.done ? "&#10003;" : String(i + 1);
+    const label = document.createElement("div");
+    label.className = "p-label";
+    let progress = st.need > 1 && st.got > 0 && !st.done ? " (" + st.got + " of " + st.need + ")" : "";
+    label.innerHTML = esc(st.label) + progress + (st.sub ? '<span class="p-sub">' + esc(st.sub) + "</span>" : "");
+    row.appendChild(mark);
+    row.appendChild(label);
+    const go = document.createElement("button");
+    go.className = "p-go";
+    go.textContent = "Go";
+    go.addEventListener("click", () => goStep(st));
+    row.appendChild(go);
+    list.appendChild(row);
+  });
+  $("planDone").classList.toggle("show", S.today.steps.length > 0 && S.today.steps.every(s => s.done));
+}
+function weekKey() {
+  const d = new Date();
+  const day = (d.getDay() + 6) % 7;
+  return localDateKey(new Date(d.getFullYear(), d.getMonth(), d.getDate() - day));
+}
+async function refreshFocusNote() {
+  const el = $("focusNote");
+  if (S.focusNote && S.focusNote.week === weekKey()) {
+    el.style.display = "";
+    el.textContent = S.focusNote.text;
+    return;
+  }
+  if (!apiKey()) { el.style.display = "none"; return; }
+  try {
+    const tags = Object.entries(S.grammarLog).sort((a, b) => b[1] - a[1]).slice(0, 3).map(e => e[0] + " (" + e[1] + "x)").join(", ") || "none logged yet";
+    const ranked = skillRank();
+    const g = nextTargetGoal(ranked[0]);
+    const sys = "You are a French language coach writing a short weekly focus note for the learner. " + promptContext() +
+      " Most frequent recent error patterns: " + tags + ". Weakest skill: " + SKILL_NAMES[ranked[0]] +
+      ". Next syllabus goal there: " + (g ? g.t : "all verified") + "." +
+      ' Write 2 to 3 specific, encouraging sentences in English naming this week\'s focus and why. No greetings. Respond with only JSON: {"note":"..."}';
+    const j = await callJSON(sys, [{ role: "user", content: "This week's focus note, please." }], 300);
+    if (j.note) {
+      S.focusNote = { week: weekKey(), text: j.note };
+      save();
+      el.style.display = "";
+      el.textContent = j.note;
+    }
+  } catch (e) { el.style.display = "none"; }
+}
+function renderToday() {
+  if (!S.today || S.today.date !== todayKey()) buildPlan();
+  renderPlanList();
+  refreshFocusNote();
+}
+$("planNew").addEventListener("click", () => { buildPlan(); renderPlanList(); });
 
 /* ============================================================
    MODE 1: TRANSLATE
@@ -962,7 +1191,9 @@ async function trNewSentence() {
     const sys = "You write one English practice sentence for a learner to translate into French. " +
       promptContext() +
       " Theme for this sentence: " + theme + "." +
-      " The sentence should be 8 to 20 words, natural and specific (real details, not generic filler), and include one level-appropriate challenge: at lower levels basic tenses and agreement, at B2 and above subjunctive triggers, nuanced tense choice, register, or idiom." + avoid +
+      (planGoal("translate") ? " Make the sentence exercise this curriculum goal: " + planGoal("translate") + "." : "") +
+      " The sentence should be " + (S.level <= 100 ? "6 to 10 words, a single clause" : S.level <= 150 ? "8 to 14 words" : S.level <= 200 ? "12 to 20 words" : "14 to 24 words, complex structures welcome") + ", natural and specific (real details, not generic filler), and include ONE level-appropriate challenge: at lower levels basic tenses and agreement, at B2 and above subjunctive triggers, nuanced tense choice, register, or idiom." +
+      (knownWords(18) ? " The French translation should mostly need vocabulary the learner has already studied: " + knownWords(18) + ". Introduce at most one or two words beyond that list." : "") + avoid +
       ' Respond with only JSON: {"english":"..."}';
     const j = await callJSON(sys, [{ role: "user", content: "One new sentence, please." }], 300);
     if (!j.english) throw new Error("No sentence returned. Try again.");
@@ -989,6 +1220,7 @@ async function trCheckAnswer() {
     logErrors(j);
     absorbVocab(j);
     addXP(Math.max(1, Math.round((j.score || 0) / 10)));
+    planNote("translate");
   } catch (e) { toast(e.message); }
   busy(btn, false);
 }
@@ -1066,6 +1298,7 @@ document.querySelectorAll("#fcGrades button").forEach(b => {
     gradeCard(flashCard, q);
     if (q === 0) flashQueue.push(flashCard);
     addXP(q >= 4 ? 2 : 1);
+    planNote("card");
     renderVocabStats();
     nextFlashCard();
   });
@@ -1132,6 +1365,7 @@ function matchTap(btn, card) {
     const c = S.deck.find(x => x.id === card.id);
     if (c) gradeCard(c, mWrong[card.id] ? 3 : 4);
     addXP(1);
+    planNote("card");
     if (mDone === mCards.length) {
       $("mHint").textContent = "Round complete! Tap New round to keep going.";
       renderVocabStats();
@@ -1305,6 +1539,7 @@ $("gCheck").addEventListener("click", async () => {
     logErrors(j);
     absorbVocab(j);
     addXP(Math.max(1, Math.round((j.score || 0) / 10)));
+    planNote("grammar");
     $("gCheck").style.display = "none";
     $("gNext").style.display = "";
     $("gNext").textContent = gIndex + 1 < gExercises.length ? "Next" : "Finish";
@@ -1338,6 +1573,8 @@ $("rdNew").addEventListener("click", async () => {
       : "";
     const sys = "You write a French reading text with comprehension questions. " + promptContext() +
       " Format: " + style + ". Theme: " + theme + ". About " + readTargetWords() + " words, level-appropriate." + richness +
+      (planGoal("read") ? "The text should exercise this curriculum goal: " + planGoal("read") + ". " : "") +
+      (knownWords(15) ? "Lean on vocabulary the learner has already studied where natural: " + knownWords(15) + ". " : "") +
       " Make it specific and lively, with concrete details such as names, numbers, times, and places. Absolutely avoid generic everyday filler. A little humor or tension is welcome. " +
       "Then 3 multiple-choice comprehension questions IN FRENCH, each with exactly 3 options and one correct answer. Make wrong options plausible. " +
       ' Respond with only JSON: {"passage":"...","questions":[{"q":"...","options":["...","...","..."],"answer":0,"why":"one short English sentence explaining the answer"}]}';
@@ -1403,6 +1640,7 @@ function answerReading(q, chosen, optsEl, whyEl) {
     sc.innerHTML = "<b>" + rdCorrect + " of " + rdCurrent.questions.length + " correct.</b> " +
       (rdCorrect === 3 ? "Full marks." : rdCorrect === 2 ? "Solid." : "Tough one; look up the words that threw you and try another.");
     addXP(1 + rdCorrect * 3);
+    planNote("read");
   }
 }
 $("rdPlay").addEventListener("click", () => rdCurrent && speakLong(rdCurrent.passage, 1));
@@ -1424,7 +1662,7 @@ async function lookupWord(token, span) {
     const context = rdCurrent.passage.slice(Math.max(0, idx - 120), idx + 140);
     const sys = "You are a French-English dictionary that understands context. " +
       "Given a French word and the sentence it appears in, explain it. Use US spelling. Never use em dashes. " +
-      ' Respond with only JSON: {"french":"the dictionary (base) form","en":"meaning in this exact context","note":"very short grammar note, e.g. feminine noun; passé composé of prendre; subjunctive"}';
+      ' Respond with only JSON: {"french":"the dictionary (base) form","en":"plain English meaning in this exact context","note":"one short plain-English usage note WITH a tiny example, e.g. a feminine word: la maison; the past form of prendre: j\'ai pris; usually paired with à: à Paris. Never a bare label like (with preposition)."}';
     const j = await callJSON(sys, [{ role: "user", content: "Word: " + word + "\nContext: ..." + context + "..." }], 300);
     const base = j.french || j.no || word;
     const meaning = j.en || j.english || "";
@@ -1484,7 +1722,40 @@ function ensureVoice() {
     toast("No French voice found on this device; trying the default voice. Install a French voice in your system settings for reliable audio.", 5500);
   }
 }
+/* ----- premium voice: Google Cloud TTS with device-voice fallback ----- */
+const GTTS_KEY = "francofile_gtts";
+function gttsKey() { return localStorage.getItem(GTTS_KEY) || ""; }
+let gAudio = null, gttsWarned = false;
+async function googleSpeak(text, rate) {
+  try {
+    if (gAudio) { gAudio.pause(); gAudio = null; }
+    if (window.speechSynthesis) speechSynthesis.cancel();
+    const url = "https://texttospeech.googleapis.com/v1/text:synthesize?key=" + encodeURIComponent(gttsKey());
+    const mk = voice => ({ input: { text: text }, voice: voice, audioConfig: { audioEncoding: "MP3", speakingRate: rate || 1 } });
+    let res = await fetch(url, { method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify(mk({ languageCode: "fr-FR", name: "fr-FR-Wavenet-C" })) });
+    if (res.status === 400) {
+      res = await fetch(url, { method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify(mk({ languageCode: "fr-FR" })) });
+    }
+    if (!res.ok) throw new Error("Google TTS error " + res.status);
+    const j = await res.json();
+    gAudio = new Audio("data:audio/mp3;base64," + j.audioContent);
+    await gAudio.play();
+  } catch (e) {
+    if (!gttsWarned) { gttsWarned = true; toast("Premium voice unavailable (" + e.message + "); using the device voice.", 4500); }
+    browserSpeak(text, rate);
+  }
+}
 function speak(text, rate) {
+  if (gttsKey()) { googleSpeak(text, rate); return; }
+  browserSpeak(text, rate);
+}
+function speakLong(text, rate) {
+  if (gttsKey()) { googleSpeak(text, rate); return; }
+  browserSpeakLong(text, rate);
+}
+function browserSpeak(text, rate) {
   if (!canSpeak()) { toast("This browser has no speech synthesis."); return; }
   ensureVoice();
   speechSynthesis.cancel();
@@ -1499,7 +1770,7 @@ function speak(text, rate) {
     speechSynthesis.resume(); // Chrome sometimes starts paused and stays silent without this
   }, 60);
 }
-function speakLong(text, rate) {
+function browserSpeakLong(text, rate) {
   if (!canSpeak()) { toast("This browser has no speech synthesis."); return; }
   ensureVoice();
   speechSynthesis.cancel();
@@ -1535,6 +1806,8 @@ async function liNewSentence() {
     noteTheme(theme);
     const sys = "You write French for a listening dictation exercise. " + promptContext() +
       " Theme: " + theme + ". " + lvListenSpec(cefrLabel(S.level)) + " Natural spoken French, specific rather than generic." +
+      (planGoal("listen") ? " The item should exercise this curriculum goal: " + planGoal("listen") + "." : "") +
+      (knownWords(15) ? " Use mostly vocabulary the learner has already studied: " + knownWords(15) + "." : "") +
       ' Respond with only JSON: {"french":"the french text","english":"english meaning"}';
     const j = await callJSON(sys, [{ role: "user", content: "One new dictation item." }], 500);
     const frText = j.french || j.norwegian || j.text;
@@ -1559,7 +1832,7 @@ async function liCheckAnswer() {
     const sys = "You mark a French listening dictation. " + promptContext() +
       " Compare what the learner typed to the actual text. Small accent slips matter less than missed or wrong words. " +
       ' Respond with only JSON: {"score":0-100,' +
-      '"errors":[{"issue":"3-6 word label","explanation":"what was missed or misheard and why it matters, in English","tag":"one of: ' + TAG_LIST + '"}],' +
+      '"errors":[{"issue":"3-6 word plain-English label","explanation":"what was missed or misheard, in plain everyday English with no unexplained grammar terms","tag":"one of: ' + TAG_LIST + '"}],' +
       '"comment":"one short honest sentence",' +
       '"vocab":[{"french":"...","en":"..."}]} ' +
       "vocab holds up to 3 missed items worth drilling (" + vocabSpec() + "); [] if none.";
@@ -1571,6 +1844,7 @@ async function liCheckAnswer() {
     logErrors(j);
     absorbVocab(j);
     addXP(Math.max(1, Math.round((j.score || 0) / 10)));
+    planNote("listen");
   } catch (e) { toast(e.message); }
   busy(btn, false);
 }
@@ -1611,7 +1885,7 @@ async function chatSend(userText) {
     chatHistory.push({ role: "assistant", content: JSON.stringify(j) });
     if (userText && j.correction) chatBubble("corr", "<b>Note:</b> " + esc(j.correction));
     chatBubble("ai", esc(j.reply || "..."));
-    if (userText) addXP(2);
+    if (userText) { addXP(2); planNote("chat"); }
   } catch (e) {
     chatHistory.pop();
     toast(e.message);
@@ -1979,6 +2253,7 @@ function finishCheckpoint() {
     save();
     sum.innerHTML = "<b>Passed!</b> Level " + S.gate.level + " confirmed, and any goals you hit are now marked in the syllabus. Onward.";
     addXP(20, false);
+    planNote("checkpoint");
     renderProgress();
   } else {
     sum.innerHTML = "<b>Not this time (needed 70).</b> Look at what tripped you up, drill it in Grammar or Vocab, and retake the test from the banner whenever you like.";
@@ -2056,6 +2331,13 @@ function mergeState(d, withSettings) {
   }
   if (d.profile && d.profile.placedAt && (!S.profile.placedAt || d.profile.placedAt > S.profile.placedAt)) {
     S.profile = Object.assign({}, S.profile, d.profile);
+  }
+  if (d.focusNote && (!S.focusNote || d.focusNote.week > S.focusNote.week)) {
+    S.focusNote = d.focusNote;
+  }
+  if (d.today && d.today.date === todayKey()) {
+    const prog = t => (t.steps || []).reduce((a, s) => a + (s.got || 0), 0);
+    if (!S.today || S.today.date !== todayKey() || prog(d.today) > prog(S.today)) S.today = d.today;
   }
   if (withSettings && d.settings) {
     S.settings.topics = d.settings.topics || S.settings.topics;
@@ -2204,6 +2486,7 @@ function loadSettingsUI() {
   $("sTopics").value = S.settings.topics;
   $("sGhToken").value = ghToken();
   if (ghToken()) $("syncStatus").textContent = "Connected. Syncs automatically.";
+  $("sGTts").value = gttsKey();
   pickVoices();
 }
 $("sSave").addEventListener("click", () => {
@@ -2213,6 +2496,9 @@ $("sSave").addEventListener("click", () => {
   S.settings.cardStyle = $("sCardStyle").value;
   S.settings.topics = $("sTopics").value.trim() || DEFAULT_TOPICS;
   S.settings.voiceURI = $("sVoice").value;
+  const gk = $("sGTts").value.trim();
+  if (gk) localStorage.setItem(GTTS_KEY, gk); else localStorage.removeItem(GTTS_KEY);
+  gttsWarned = false;
   const voices = canSpeak() ? speechSynthesis.getVoices() : [];
   noVoice = voices.find(v => v.voiceURI === S.settings.voiceURI) || noVoice;
   save();
@@ -2253,6 +2539,7 @@ $("sReset").addEventListener("click", () => {
   localStorage.removeItem(KEY_KEY);
   localStorage.removeItem(GH_TOKEN_KEY);
   localStorage.removeItem(GIST_ID_KEY);
+  localStorage.removeItem(GTTS_KEY);
   location.reload();
 });
 
@@ -2261,6 +2548,7 @@ load();
 renderProgress();
 renderVocabStats();
 loadSettingsUI();
+renderToday();
 if (ghToken()) syncNow(false);
 if (!apiKey()) {
   setTimeout(() => {
