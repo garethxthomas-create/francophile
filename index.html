@@ -249,6 +249,11 @@ details.syl summary{cursor:pointer; font-weight:600; font-size:.9rem; padding:10
 
 <!-- TODAY -->
 <section class="view active" id="view-today">
+  <div class="card" id="placeCard" style="display:none">
+    <h2 id="placeHead">Start here (recommended)</h2>
+    <p id="placeTxt" style="margin:0; font-size:.93rem;"></p>
+    <div class="btnrow"><button id="placeGo">Take the level check</button></div>
+  </div>
   <div class="card">
     <h2>Today's plan</h2>
     <div class="lesson" id="focusNote" style="display:none"></div>
@@ -527,7 +532,8 @@ let S = {
   goals: {},
   profile: { listen: "", read: "", write: "", placedAt: null },
   today: null,
-  focusNote: null
+  focusNote: null,
+  placeLevel: 0
 };
 
 function load() {
@@ -544,6 +550,7 @@ function load() {
       S.profile = Object.assign({ listen: "", read: "", write: "", placedAt: null }, d.profile || {});
       S.today = d.today || null;
       S.focusNote = d.focusNote || null;
+      S.placeLevel = d.placeLevel || 0;
       if (!Array.isArray(S.deck)) S.deck = [];
       if (!Array.isArray(S.recentEn)) S.recentEn = [];
       if (!Array.isArray(S.recentThemes)) S.recentThemes = [];
@@ -864,8 +871,24 @@ const TARGET_LV = "C1"; // headline coverage target shown on Progress
 
 function goalState(id) { return S.goals[id] || 0; }
 function setGoal(id, v) {
-  if (v > goalState(id)) { S.goals[id] = v; save(); }
+  if (v > goalState(id)) {
+    S.goals[id] = v;
+    if (v === 2) {
+      const g = SYLLABUS.find(x => x.id === id);
+      if (g) {
+        for (const lv of LV_ORDER) {
+          const c = coverage(lv, g.sk);
+          if (c.total && c.done === c.total && LV_ORDER.indexOf(S.profile[g.sk]) < LV_ORDER.indexOf(lv)) {
+            S.profile[g.sk] = lv;
+            toast(SKILL_NAMES[g.sk] + " advanced to " + lv + "! Content will follow.", 4500);
+          }
+        }
+      }
+    }
+    save();
+  }
 }
+function skillBand(sk) { return S.profile[sk] || cefrLabel(S.level); }
 function goalsFor(lv, sk) { return SYLLABUS.filter(g => g.lv === lv && g.sk === sk); }
 function coverage(lv, sk) {
   const gs = sk ? goalsFor(lv, sk) : SYLLABUS.filter(g => g.lv === lv);
@@ -1173,8 +1196,23 @@ function renderToday() {
   if (!S.today || S.today.date !== todayKey()) buildPlan();
   renderPlanList();
   refreshFocusNote();
+  const pc = $("placeCard");
+  if (!S.profile.placedAt) {
+    pc.style.display = "";
+    $("placeHead").textContent = "Start here (recommended)";
+    $("placeTxt").textContent = "Take the 15-20 minute level check so the app learns your real level in each skill. Until then, difficulty is guesswork. It can only raise your level, never lower it.";
+    $("placeGo").textContent = "Take the level check";
+  } else if (S.level - (S.placeLevel || 0) >= 30) {
+    pc.style.display = "";
+    $("placeHead").textContent = "Time for a re-check (recommended)";
+    $("placeTxt").textContent = "You have climbed a long way since your last level check. Retake it to re-calibrate; it can only raise you, never lower you.";
+    $("placeGo").textContent = "Retake the level check";
+  } else {
+    pc.style.display = "none";
+  }
 }
 $("planNew").addEventListener("click", () => { buildPlan(); renderPlanList(); });
+$("placeGo").addEventListener("click", () => { showView("test"); startPlacement(); });
 
 /* ============================================================
    MODE 1: TRANSLATE
@@ -1192,7 +1230,7 @@ async function trNewSentence() {
       promptContext() +
       " Theme for this sentence: " + theme + "." +
       (planGoal("translate") ? " Make the sentence exercise this curriculum goal: " + planGoal("translate") + "." : "") +
-      " The sentence should be " + (S.level <= 100 ? "6 to 10 words, a single clause" : S.level <= 150 ? "8 to 14 words" : S.level <= 200 ? "12 to 20 words" : "14 to 24 words, complex structures welcome") + ", natural and specific (real details, not generic filler), and include ONE level-appropriate challenge: at lower levels basic tenses and agreement, at B2 and above subjunctive triggers, nuanced tense choice, register, or idiom." +
+      " Pitch the required French at CEFR " + skillBand("write") + ". The sentence should be " + (skillBand("write") === "A1" ? "5 to 8 words, a single clause" : skillBand("write") === "A2" ? "6 to 10 words, a single clause" : skillBand("write") === "B1" ? "8 to 14 words" : skillBand("write") === "B2" ? "12 to 20 words" : "14 to 24 words, complex structures welcome") + ", natural and specific (real details, not generic filler), and include ONE level-appropriate challenge: at lower levels basic tenses and agreement, at B2 and above subjunctive triggers, nuanced tense choice, register, or idiom." +
       (knownWords(18) ? " The French translation should mostly need vocabulary the learner has already studied: " + knownWords(18) + ". Introduce at most one or two words beyond that list." : "") + avoid +
       ' Respond with only JSON: {"english":"..."}';
     const j = await callJSON(sys, [{ role: "user", content: "One new sentence, please." }], 300);
@@ -1558,7 +1596,7 @@ $("gBack").addEventListener("click", renderGrammarPicker);
    ============================================================ */
 let rdCurrent = null, rdAnswered = 0, rdCorrect = 0;
 
-function readTargetWords() { return Math.min(260, 40 + Math.round(S.level * 0.75)); }
+function readTargetWords() { return lvReadWords(skillBand("read")) + Math.min(60, Math.round(S.level / 6)); }
 
 $("rdNew").addEventListener("click", async () => {
   const btn = $("rdNew");
@@ -1805,7 +1843,7 @@ async function liNewSentence() {
     const theme = pickTheme();
     noteTheme(theme);
     const sys = "You write French for a listening dictation exercise. " + promptContext() +
-      " Theme: " + theme + ". " + lvListenSpec(cefrLabel(S.level)) + " Natural spoken French, specific rather than generic." +
+      " Theme: " + theme + ". " + lvListenSpec(skillBand("listen")) + " Pitch at CEFR " + skillBand("listen") + ". Natural spoken French, specific rather than generic." +
       (planGoal("listen") ? " The item should exercise this curriculum goal: " + planGoal("listen") + "." : "") +
       (knownWords(15) ? " Use mostly vocabulary the learner has already studied: " + knownWords(15) + "." : "") +
       ' Respond with only JSON: {"french":"the french text","english":"english meaning"}';
@@ -2051,9 +2089,9 @@ function startTest() {
 /* ----- placement: adaptive ladder starting at B1 ----- */
 function startPlacement() {
   const skList = SKILLS.filter(sk => sk !== "listen" || (canSpeak() && noVoice));
-  pl = { skList, si: 0, stage: "B1", history: {}, levels: {} };
+  pl = { skList, si: 0, stage: "B1", pair: [], levels: {} };
   T = { mode: "placement", items: [], idx: 0, scores: [], cur: null };
-  $("tHead").textContent = "Placement test";
+  $("tHead").textContent = "Level check";
   buildPlacementItem();
 }
 function buildPlacementItem() {
@@ -2062,8 +2100,12 @@ function buildPlacementItem() {
   renderTestItem();
 }
 function plRecord(score) {
+  // two questions per rung: decide on their average
+  pl.pair.push(score);
+  if (pl.pair.length < 2) return;
+  const pass = (pl.pair[0] + pl.pair[1]) / 2 >= 70;
+  pl.pair = [];
   const sk = pl.skList[pl.si];
-  const pass = score >= 70;
   const stage = pl.stage;
   let result = null;
   if (stage === "B1") pl.stage = pass ? "C1" : "A2";
@@ -2085,7 +2127,7 @@ async function renderTestItem() {
   resetTestUI();
   const label = T.mode === "checkpoint"
     ? "Question " + (T.idx + 1) + " of " + T.items.length + (it.goal ? "  |  Goal: " + it.goal.t : "")
-    : "Question " + (T.idx + 1) + " of up to " + (pl.skList.length * 3) + "  |  " + SKILL_NAMES[it.kind] + ", level " + it.lv;
+    : "Question " + (T.idx + 1) + " of up to " + (pl.skList.length * 6) + "  |  " + SKILL_NAMES[it.kind] + ", level " + it.lv;
   $("tProg").textContent = label;
   $("tPrompt").textContent = "Preparing...";
   const lv = it.lv || (it.goal ? it.goal.lv : cefrLabel(S.level));
@@ -2220,6 +2262,10 @@ $("tCheck").addEventListener("click", async () => {
       j = await markDictation(it.norwegian, ans);
     } else if (it.kind === "write") {
       j = await markWriting(it.task, ans, lv);
+      // the examiner's own CEFR estimate counts: writing judged at or above the tested level passes
+      if (T.mode === "placement" && j && j.cefr && LV_ORDER.indexOf(j.cefr) >= LV_ORDER.indexOf(lv)) {
+        j.score = Math.max(j.score || 0, 75);
+      }
     }
     renderMarking($("tResult"), j);
     logErrors(j);
@@ -2267,7 +2313,7 @@ function finishPlacement() {
   for (const sk of pl.skList) applyPlacement(sk, pl.levels[sk]);
   S.profile.placedAt = Date.now();
   save();
-  let html = "<b>Placement complete.</b><br>";
+  let html = "<b>Level check complete.</b><br>";
   const pts = { A1: 0, A2: 1, B1: 2, B2: 3, C1: 4 };
   let points = 0;
   for (const sk of SKILLS) {
@@ -2276,22 +2322,17 @@ function finishPlacement() {
     points += pts[lvl] || 0;
   }
   const floor = points * 20;
+  if (floor > S.level) { S.level = floor; S.xp = 0; }
+  S.placeLevel = S.level;
+  save();
+  renderProgress();
+  html += "<br><b>Applied.</b> Your level is now " + S.level + ". From here, listening is pitched at " + skillBand("listen") +
+    ", reading at " + skillBand("read") + ", and writing at " + skillBand("write") +
+    ". Checkpoints will advance each skill as you verify its goals.";
   const sum = $("tSummary");
   sum.style.display = "";
   sum.innerHTML = html;
   $("tProg").textContent = "Scores: " + T.scores.join(", ");
-  if (floor > S.level) {
-    const b = document.createElement("button");
-    b.textContent = "Set my level to " + floor + " to match";
-    b.style.marginTop = "10px";
-    b.addEventListener("click", () => {
-      S.level = floor; S.xp = 0; save(); renderProgress();
-      toast("Level set to " + floor);
-      b.remove();
-    });
-    sum.appendChild(document.createElement("br"));
-    sum.appendChild(b);
-  }
   renderStats();
 }
 $("tBack").addEventListener("click", () => showView("translate"));
@@ -2332,6 +2373,7 @@ function mergeState(d, withSettings) {
   if (d.profile && d.profile.placedAt && (!S.profile.placedAt || d.profile.placedAt > S.profile.placedAt)) {
     S.profile = Object.assign({}, S.profile, d.profile);
   }
+  S.placeLevel = Math.max(S.placeLevel || 0, d.placeLevel || 0);
   if (d.focusNote && (!S.focusNote || d.focusNote.week > S.focusNote.week)) {
     S.focusNote = d.focusNote;
   }
