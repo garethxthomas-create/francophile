@@ -1984,6 +1984,25 @@ if (SR) {
 let T = { mode: null, items: [], idx: 0, scores: [], cur: null };
 let pl = null;
 
+/* Tests draw from neutral themes (never the learner's personal topics) and
+   remember every question asked this session so nothing repeats. */
+function testTheme() {
+  if (!T.themes) T.themes = [];
+  const fresh = CORE_THEMES.filter(t => !T.themes.includes(t));
+  const pool = fresh.length ? fresh : CORE_THEMES;
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  T.themes.push(pick);
+  return pick;
+}
+function testAvoid() {
+  return (T.used && T.used.length) ? " It must NOT resemble any of these previous test items: " + T.used.join(" | ") + "." : "";
+}
+function testNote(text) {
+  if (!T.used) T.used = [];
+  if (text) T.used.push(String(text).slice(0, 90));
+}
+const TEST_NEUTRAL = " For this test item, IGNORE the learner's personal topics entirely; use this everyday theme instead: ";
+
 function lvReadWords(lv) {
   return { A1: 35, A2: 60, B1: 100, B2: 150, C1: 200, C2: 250 }[lv] || 100;
 }
@@ -2010,6 +2029,7 @@ async function genListenItem(lv, goalText) {
   const sys = "You write French for a listening dictation test item at CEFR level " + lv + ". " + promptContext() +
     " " + lvListenSpec(lv) +
     (goalText ? " The item should exercise this curriculum goal: " + goalText + "." : "") +
+    TEST_NEUTRAL + testTheme() + "." + testAvoid() +
     ' Respond with only JSON: {"french":"the french text"}';
   const j = await callJSON(sys, [{ role: "user", content: "One dictation item." }], 400);
   return { norwegian: j.french || j.norwegian || j.text || "" };
@@ -2017,18 +2037,23 @@ async function genListenItem(lv, goalText) {
 async function genReadItem(lv, goalText) {
   const sys = "You write a French reading test item at CEFR level " + lv + ". " + promptContext() +
     " A text of about " + lvReadWords(lv) + " words" +
-    (goalText ? ", in a format that exercises this curriculum goal: " + goalText : ", on an everyday topic") +
-    ". Then 2 multiple-choice comprehension questions IN FRENCH, each with exactly 3 options and one correct answer." +
+    (goalText ? ", in a format that exercises this curriculum goal: " + goalText : "") +
+    "." + TEST_NEUTRAL + testTheme() + "." + testAvoid() +
+    " Then 2 multiple-choice comprehension questions IN FRENCH, each with exactly 3 options and one correct answer." +
     ' Respond with only JSON: {"passage":"...","questions":[{"q":"...","options":["...","...","..."],"answer":0,"why":"one short English sentence"}]}';
   return callJSON(sys, [{ role: "user", content: "One reading item." }], 1600);
 }
 async function genWriteItem(lv, goalText) {
   if (!goalText) {
     const arr = WRITE_PROMPTS[lv] || WRITE_PROMPTS.B1;
-    return { task: arr[Math.floor(Math.random() * arr.length)] };
+    const used = T.used || [];
+    const pool = arr.filter(p => !used.includes(p.slice(0, 90)));
+    const src = pool.length ? pool : arr;
+    return { task: src[Math.floor(Math.random() * src.length)] };
   }
   const sys = "You create one short writing task (written in English) for a French test at CEFR level " + lv + ". " + promptContext() +
     " The task must test this curriculum goal: " + goalText + ". Tell the learner what to write in French and roughly how many sentences." +
+    TEST_NEUTRAL + testTheme() + "." + testAvoid() +
     ' Respond with only JSON: {"task":"..."}';
   return callJSON(sys, [{ role: "user", content: "One writing task." }], 300);
 }
@@ -2134,18 +2159,22 @@ async function renderTestItem() {
   try {
     if (it.kind === "trans") {
       const sys = "You write one English sentence for a French checkpoint test. " + promptContext() +
+        TEST_NEUTRAL + testTheme() + "." + testAvoid() +
         ' 8 to 20 words, testing level-appropriate grammar. Respond with only JSON: {"english":"..."}';
       const j = await callJSON(sys, [{ role: "user", content: "One test sentence." }], 300);
       it.english = j.english;
+      testNote(it.english);
       $("tPrompt").textContent = "Translate to French: " + j.english;
     } else if (it.kind === "listen") {
       const j = await genListenItem(lv, it.goal && it.goal.t);
       it.norwegian = j.norwegian;
+      testNote(it.norwegian);
       $("tPrompt").textContent = "Listen and type what you hear:";
       $("tAudioRow").style.display = "";
     } else if (it.kind === "read") {
       const j = await genReadItem(lv, it.goal && it.goal.t);
       it.read = j;
+      testNote(j.passage);
       it.readScore = 0; it.readAnswered = 0;
       $("tPrompt").textContent = "Read the text and answer the questions:";
       $("tInput").style.display = "none";
@@ -2154,6 +2183,7 @@ async function renderTestItem() {
     } else if (it.kind === "write") {
       const j = await genWriteItem(lv, it.goal && it.goal.t);
       it.task = j.task;
+      testNote(it.task);
       $("tPrompt").textContent = j.task;
     } else if (it.kind === "vocab") {
       renderVocabItem(it);
